@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pluggable UI Designer - 开源前端模板市场与 AI 提示词中心</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+            },
+            slate: {
+              850: '#111827',
+              900: '#0f172a',
+              950: '#070b14',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SF Mono"', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#070b14] text-slate-100 antialiased min-h-screen flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+
+  <!-- 全局轻量 Toast 提示框 -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 bg-slate-900 border border-emerald-500/50 text-white px-4 py-2.5 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] font-mono text-xs">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-msg">提示词已复制！可直接黏贴给 AI 复刻</span>
+  </div>
+
+  <!-- 顶部开源导航栏 -->
+  <header class="border-b border-white/10 bg-[#070b14]/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl bg-gradient-to-tr from-indigo-500 to-cyan-400 text-slate-950 flex items-center justify-center font-black font-mono shadow-[0_0_15px_rgba(99,102,241,0.4)]">
+          UI
+        </div>
+        <div>
+          <h1 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+            Pluggable UI Marketplace
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">v1.0.0</span>
+          </h1>
+          <p class="text-xs text-slate-400 font-mono hidden sm:block">开源前端模板市场 · 细节点积木式插拔 (Slot Mixins)</p>
+        </div>
+      </div>
+
+      <!-- 快捷链接与 GitHub 徽章 -->
+      <div class="flex items-center gap-4 text-xs font-mono">
+        <a href="#templates" class="text-slate-400 hover:text-white transition-colors hidden md:inline">浏览模板</a>
+        <a href="06_design_system_cookbook.html" class="text-slate-400 hover:text-white transition-colors hidden md:inline">提示词工坊</a>
+        <a href="https://github.com/Ikaros-521/pluggable-ui-designer" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/20 text-white flex items-center gap-2 transition-all active:scale-95 shadow-sm">
+          <i data-lucide="github" class="w-4 h-4"></i>
+          <span>GitHub Star</span>
+          <span class="px-1.5 py-0.2 bg-white/10 rounded text-[10px] text-slate-300 font-bold">★ Open</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体工作区 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-12 space-y-16">
+
+    <!-- Hero 品牌引导区 -->
+    <section class="text-center space-y-5 max-w-4xl mx-auto py-8">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-950/70 border border-indigo-500/40 text-xs font-mono text-indigo-300 shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+        <span>拒绝千篇一律的 AI Slop · 新一代可插拔前端设计规范</span>
+      </div>
+
+      <h2 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight">
+        像搭积木一样自由插拔<br>
+        <span class="bg-gradient-to-r from-indigo-400 via-cyan-300 to-emerald-400 bg-clip-text text-transparent">
+          专业级前端 UI 交互原型与设计配方
+        </span>
+      </h2>
+
+      <p class="text-sm sm:text-base text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        将不易产生分歧的基座审美内化，把阴影、布局骨架、调色倾向与微交互彻底解耦。
+        不仅提供开箱即用的高颜值单文件模板，更配备<strong>一键复刻的 AI 提示词配方</strong>。
+      </p>
+
+      <!-- 快速导航按钮组 -->
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-3 font-mono text-xs">
+        <a href="#templates" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all active:scale-95 shadow-[0_0_20px_rgba(99,102,241,0.35)] flex items-center gap-2">
+          <span>挑选前端模板</span>
+          <i data-lucide="arrow-down" class="w-4 h-4"></i>
+        </a>
+        <a href="06_design_system_cookbook.html" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/15 text-slate-200 transition-all active:scale-95 flex items-center gap-2">
+          <i data-lucide="book-open" class="w-4 h-4 text-cyan-400"></i>
+          <span>进入提示词配方工坊 (Cookbook)</span>
+        </a>
+        <a href="05_spotlight_and_glassmorphism.html" class="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-white/15 text-slate-200 transition-all active:scale-95 flex items-center gap-2">
+          <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+          <span>微交互实验室 (聚光灯 & 毛玻璃)</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- 模板市场展示区 (Marketplace Section) -->
+    <section id="templates" class="space-y-8">
+
+      <!-- 分类筛选器 Tab -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div>
+          <h3 class="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+            精选原型模板市场
+            <span class="text-xs font-mono text-slate-400 font-normal">（共 6 款核心作品）</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">每个模板均支持单文件即开即用与一键提取 AI 提示词</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-1.5 text-xs font-mono">
+          <button onclick="filterTemplates('all')" class="market-btn active px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-medium transition-all shadow-sm">
+            全部 (6)
+          </button>
+          <button onclick="filterTemplates('devtools')" class="market-btn px-3 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-400 hover:text-white transition-all">
+            极客研发 (DevTools)
+          </button>
+          <button onclick="filterTemplates('creative')" class="market-btn px-3 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-400 hover:text-white transition-all">
+            创作者与知识
+          </button>
+          <button onclick="filterTemplates('ops')" class="market-btn px-3 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-400 hover:text-white transition-all">
+            监控运维 (Ops)
+          </button>
+          <button onclick="filterTemplates('labs')" class="market-btn px-3 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-400 hover:text-white transition-all">
+            实验室 (Labs)
+          </button>
+        </div>
+      </div>
+
+      <!-- 模板卡片网格 (Marketplace Cards Grid) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="templates-grid">
+
+        <!-- ============================================== -->
+        <!-- 模板 01：Chronos Review (极客暗黑审查) -->
+        <!-- ============================================== -->
+        <div class="template-card rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-sm flex flex-col justify-between hover:border-cyan-500/40 transition-all duration-200 group" data-category="devtools">
+          <div class="space-y-4">
+            <!-- 顶部类型标签 -->
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2.5 py-0.5 rounded">
+                01 · DEVTOOLS SAAS
+              </span>
+              <span class="text-xs text-slate-500 font-mono">暗黑精工</span>
+            </div>
+
+            <!-- 模板小窗预览卡 -->
+            <div class="rounded-xl border border-white/10 bg-slate-950 p-4 font-mono text-xs space-y-2">
+              <div class="flex items-center justify-between text-slate-400 text-[11px] border-b border-white/10 pb-2">
+                <span>PR #482 代码质量巡检</span>
+                <span class="text-rose-400 font-bold">2 CRITICAL</span>
+              </div>
+              <div class="text-rose-400/80 bg-rose-950/30 px-2 py-1 rounded text-[11px]">
+                - sessionCache.Store(token, userData)
+              </div>
+              <div class="text-emerald-400/80 bg-emerald-950/30 px-2 py-1 rounded text-[11px]">
+                + m.mutex.Lock(); defer m.mutex.Unlock()
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold text-white tracking-tight group-hover:text-cyan-300 transition-colors">
+                Chronos Review · AI 代码审查与漏洞巡检工作台
+              </h4>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                严肃工程师生产力大盘，具备暗黑磨砂发丝线微质感、左侧 Dock 导航、代码高危 Diff 与自动 Patch 门禁。
+              </p>
+            </div>
+
+            <!-- 细节点槽位标识 (Slot Badges) -->
+            <div class="flex flex-wrap gap-1.5 font-mono text-[10px]">
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">elevation: hairline</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">layout: dock</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">palette: cold_slate</span>
+            </div>
+          </div>
+
+          <!-- 操作双按钮 -->
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
+            <a href="01_chronos_review.html" target="_blank" class="flex-1 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-mono font-bold text-xs transition-all text-center flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.25)]">
+              <span>全屏在线预览</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+            <button onclick="copyTemplatePrompt('chronos')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95 flex items-center gap-1.5" title="复制用于让 AI 重新复刻此页面的提示词">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>复制 Prompt</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 模板 02：Aether Garden (人文暖调纸质) -->
+        <!-- ============================================== -->
+        <div class="template-card rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-sm flex flex-col justify-between hover:border-amber-500/40 transition-all duration-200 group" data-category="creative">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold text-amber-400 bg-amber-950/60 border border-amber-800/60 px-2.5 py-0.5 rounded">
+                02 · KNOWLEDGE OS
+              </span>
+              <span class="text-xs text-slate-500 font-mono">暖调人文</span>
+            </div>
+
+            <!-- 模板小窗预览卡 -->
+            <div class="rounded-xl border border-stone-200/80 bg-[#fcfbf9] p-4 text-stone-800 space-y-2">
+              <div class="flex items-center justify-between text-[11px] font-mono text-stone-500 border-b border-stone-200/60 pb-1.5">
+                <span>思考花园 · 灵感沉淀</span>
+                <span class="text-amber-700 font-bold">88.4% 连接率</span>
+              </div>
+              <div class="text-xs font-serif font-medium text-stone-900">
+                “简洁并不意味着功能简陋，而是让关键信息在没有噪音的环境下自然流动。”
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold text-white tracking-tight group-hover:text-amber-300 transition-colors">
+                Aether Garden · 思考花园与灵感知识空间
+              </h4>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                温润暖调石系纸质底色，柔和双层大弥散轻投影，Bento Grid 错落便签与双向图谱共现雷达。
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 font-mono text-[10px]">
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">elevation: soft_diffusion</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">layout: bento_grid</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">palette: warm_stone</span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
+            <a href="02_aether_garden.html" target="_blank" class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-mono font-bold text-xs transition-all text-center flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(245,158,11,0.25)]">
+              <span>全屏在线预览</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+            <button onclick="copyTemplatePrompt('aether')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95 flex items-center gap-1.5" title="复制 Prompt">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-400"></i>
+              <span>复制 Prompt</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 模板 03：PulseOps Edge (纯扁平高密监控) -->
+        <!-- ============================================== -->
+        <div class="template-card rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-sm flex flex-col justify-between hover:border-emerald-500/40 transition-all duration-200 group" data-category="ops">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2.5 py-0.5 rounded">
+                03 · CLOUD INFRA
+              </span>
+              <span class="text-xs text-slate-500 font-mono">素雅纯扁平</span>
+            </div>
+
+            <!-- 模板小窗预览卡 -->
+            <div class="rounded-xl border border-neutral-800 bg-neutral-950 p-4 font-mono text-xs space-y-1.5">
+              <div class="flex items-center justify-between text-neutral-400 text-[10px]">
+                <span>GLOBAL EDGE STATUS</span>
+                <span class="text-emerald-400 font-bold">48/48 ONLINE</span>
+              </div>
+              <div class="text-sm font-bold text-white">142.8 Gbps · 14.2ms P99</div>
+              <div class="text-[10px] text-neutral-500">Anycast BGP Route Engine v4.1</div>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors">
+                PulseOps Edge · 边缘云节点实时监控大盘
+              </h4>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                极致纯扁平功能主义，彻底零阴影，纯粹依靠微弱中性灰色阶与发丝线分层，呈现高信噪比遥测流。
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 font-mono text-[10px]">
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">elevation: flat_zen</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">layout: dense_grid</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">palette: mono_emerald</span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
+            <a href="03_pulseops_edge.html" target="_blank" class="flex-1 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-mono font-bold text-xs transition-all text-center flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
+              <span>全屏在线预览</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+            <button onclick="copyTemplatePrompt('pulseops')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95 flex items-center gap-1.5" title="复制 Prompt">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>复制 Prompt</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 模板 04：Lumina Studio (多色相微粉彩创作者) -->
+        <!-- ============================================== -->
+        <div class="template-card rounded-2xl border-2 border-violet-500/40 bg-slate-900/80 p-6 shadow-[0_0_25px_rgba(139,92,246,0.15)] flex flex-col justify-between hover:border-violet-400 transition-all duration-200 group relative" data-category="creative">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold text-violet-300 bg-violet-950/80 border border-violet-700/60 px-2.5 py-0.5 rounded">
+                04 · CREATIVE STUDIO
+              </span>
+              <div class="flex -space-x-1">
+                <span class="w-2.5 h-2.5 rounded-full bg-violet-400 border border-slate-900"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 border border-slate-900"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 border border-slate-900"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-400 border border-slate-900"></span>
+              </div>
+            </div>
+
+            <!-- 模板小窗预览卡 -->
+            <div class="rounded-xl border border-slate-200/80 bg-[#faf9f6] p-4 text-slate-800 space-y-2">
+              <div class="flex items-center gap-1.5 text-[10px] font-mono">
+                <span class="px-2 py-0.5 rounded bg-violet-100 text-violet-800 font-bold">专栏构思</span>
+                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">视频就绪</span>
+                <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">拍摄排期</span>
+              </div>
+              <div class="text-xs font-display font-semibold text-slate-900">
+                《色彩的呼吸：在极简与信息密度间寻找黄金分割》
+              </div>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold text-white tracking-tight group-hover:text-violet-300 transition-colors">
+                Lumina Studio · 多维创作者灵感与内容工作台
+              </h4>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                保留第二套的纸质留白与轻盈悬浮，创新融入紫、绿、橙、蓝、粉 5 重低饱和多维色彩系统。
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 font-mono text-[10px]">
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">elevation: soft_diffusion</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">layout: bento_grid</span>
+              <span class="px-2 py-0.5 rounded bg-violet-950/60 border border-violet-800/60 text-violet-300 font-bold">palette: multi_accent_pastel</span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
+            <a href="04_lumina_studio.html" target="_blank" class="flex-1 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-mono font-bold text-xs transition-all text-center flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(124,58,237,0.35)]">
+              <span>全屏在线预览</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+            <button onclick="copyTemplatePrompt('lumina')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95 flex items-center gap-1.5" title="复制 Prompt">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-violet-400"></i>
+              <span>复制 Prompt</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 模板 05：微交互实验室 (聚光灯 & 液态毛玻璃) -->
+        <!-- ============================================== -->
+        <div class="template-card rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-sm flex flex-col justify-between hover:border-purple-500/40 transition-all duration-200 group" data-category="labs">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold text-purple-400 bg-purple-950/60 border border-purple-800/60 px-2.5 py-0.5 rounded flex items-center gap-1">
+                <i data-lucide="flask-conical" class="w-3 h-3"></i> 05 · INTERACTION LAB
+              </span>
+              <span class="text-xs text-slate-500 font-mono">前沿微交互</span>
+            </div>
+
+            <!-- 模板小窗预览卡 -->
+            <div class="rounded-xl border border-white/10 bg-slate-950 p-4 relative overflow-hidden font-mono text-xs space-y-1">
+              <div class="absolute -top-4 -right-4 w-16 h-16 bg-cyan-500/30 rounded-full blur-md"></div>
+              <div class="relative z-10 text-[11px] text-cyan-300">Spotlight Border: 1px 光纤跟随</div>
+              <div class="relative z-10 text-[11px] text-purple-300">Glassmorphism: 20px 高斯折射</div>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold text-white tracking-tight group-hover:text-purple-300 transition-colors">
+                微交互实验室 · 动态聚光灯与液态毛玻璃工坊
+              </h4>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                指针驱动的 1px 发丝线流光描边、卡片表面漫反射追光，以及基于 Apple VisionOS 规范的多层环境光折射毛玻璃。
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 font-mono text-[10px]">
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">interaction: spotlight_border</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">elevation: frosted_glass</span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
+            <a href="05_spotlight_and_glassmorphism.html" target="_blank" class="flex-1 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-mono font-bold text-xs transition-all text-center flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
+              <span>体验微交互实验室</span>
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            </a>
+            <button onclick="copyTemplatePrompt('spotlight')" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95 flex items-center gap-1.5" title="复制 Prompt">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+              <span>复制 Prompt</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- 模板 06：提示词配方工坊 (Design Cookbook) -->
+        <!-- ============================================== -->
+        <div class="template-card rounded-2xl border border-white/10 bg-slate-900/60 p-6 shadow-sm flex flex-col justify-between hover:border-indigo-500/40 transition-all duration-200 group" data-category="labs">
+          <div class="space-y-4">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 px-2.5 py-0.5 rounded flex items-center gap-1">
+                <i data-lucide="book-open" class="w-3 h-3"></i> 06 · PROMPT HUB
+              </span>
+              <span class="text-xs text-slate-500 font-mono">积木配方库</span>
+            </div>
+
+            <!-- 模板小窗预览卡 -->
+            <div class="rounded-xl border border-white/10 bg-slate-950 p-4 font-mono text-xs space-y-1 text-slate-400">
+              <div class="text-indigo-400 font-bold">20 款主流效果与组件代码/Prompt 字典</div>
+              <div class="text-[11px] text-slate-500">涵盖光影底纹、微交互、业务组件、色彩布局</div>
+            </div>
+
+            <div>
+              <h4 class="text-lg font-bold text-white tracking-tight group-hover:text-indigo-300 transition-colors">
+                设计系统与 AI 提示词配方工坊 (Cookbook)
+              </h4>
+              <p class="text-xs text-slate-400 mt-1 leading-relaxed">
+                汇集发丝线、弥散投影、纯扁平、流动边框、微点阵、Cmd+K 面板、动态岛等 20 款主流效果与核心组件，一键复制 Prompt 与代码。
+              </p>
+            </div>
+
+            <div class="flex flex-wrap gap-1.5 font-mono text-[10px]">
+              <span class="px-2 py-0.5 rounded bg-indigo-950/60 border border-indigo-700/60 text-indigo-300 font-bold">20 Recipes</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">One-click Copy</span>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-slate-300">Spec v1.0</span>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-white/10 flex items-center gap-2">
+            <a href="06_design_system_cookbook.html" target="_blank" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all text-center flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+              <span>进入提示词工坊</span>
+              <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- 底部开源版权 -->
+  <footer class="border-t border-white/10 py-8 bg-[#070b14]/90 text-xs font-mono text-slate-500">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <span>Pluggable UI Designer · MIT Licensed Open Source Spec</span>
+      </div>
+      <div class="flex items-center gap-4 text-slate-400">
+        <a href="https://github.com/Ikaros-521/pluggable-ui-designer" target="_blank" class="hover:text-white transition-colors">GitHub Repository</a>
+        <span>·</span>
+        <a href="06_design_system_cookbook.html" class="hover:text-white transition-colors">Prompt Cookbook</a>
+        <span>·</span>
+        <span>Zero-Config Delivery</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 模板提示词字典与交互脚本 -->
+  <script>
+    lucide.createIcons();
+
+    // 4 大产品完整 Prompt 字典 (可直接黏贴复刻整页)
+    const TEMPLATE_PROMPTS = {
+      chronos: `请使用【Pluggable UI Designer】技能为我设计一个暗黑极客风格的【AI 代码审查与漏洞巡检工作台】：
+1. 细节点插件装配 (Slot Mixins)：
+   - slot_elevation: plugin_fine_hairline (单像素 1px 微弱描边 border-white/10 + 顶部微高光内发光 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]，底色 bg-zinc-900/80)；
+   - slot_layout: plugin_sidebar_dock (左侧紧凑 64px 侧边 Dock 导航栏 + 右侧宽屏工作区)；
+   - slot_palette: plugin_cold_slate (深黑背景 bg-slate-950 + 冷调石板灰 + 电光蓝高亮)；
+   - slot_interaction: plugin_subtle_glow (巡检管道呼吸灯微动效)；
+2. 业务功能模块：
+   - 包含 PR 代码安全诊断大盘 (84.5分)、坏味道、单测覆盖率 (92.8%) 等宽统计指标卡；
+   - 包含高危脆弱性卡片与清晰的代码高亮 Diff 对比区块 (-3, +6 lines)；
+   - 包含自动化合规门禁清单与 Agent 纠偏指令输入框；
+3. 输出自包含单文件 HTML，内置 Tailwind CSS CDN 与图标。`,
+
+      aether: `请使用【Pluggable UI Designer】技能为我设计一个温润人文风格的【思考花园与灵感知识工作台】：
+1. 细节点插件装配 (Slot Mixins)：
+   - slot_elevation: plugin_soft_diffusion (柔和双层大弥散轻投影 shadow-[0_8px_30px_rgb(0,0,0,0.04),0_2px_8px_rgb(0,0,0,0.02)])；
+   - slot_layout: plugin_bento_grid (Bento 错落模块网格，核心大卡跨 2 列 2 行)；
+   - slot_palette: plugin_warm_stone (温润暖调纸质底色 #fcfbf9 + stone 暖灰阶梯 + 琥珀金点睛)；
+   - slot_interaction: plugin_tactile_bounce (悬浮微浮起 hover:-translate-y-0.5，按压微凹陷 active:scale-[0.98])；
+2. 业务功能模块：
+   - 跨 2 列深度长文构思卡片 (带双向引文标签 #系统设计哲学)；
+   - 晨间灵感便签卡、今日心流待办清单卡 (2/3 完成)；
+   - 知识共现图谱雷达卡 (128 个全库节点交汇枢纽) 与闪念随手记输入框；
+3. 输出自包含单文件 HTML。`,
+
+      pulseops: `请使用【Pluggable UI Designer】技能为我设计一个极致纯扁平风格的【边缘云节点与实时吞吐监控大盘】：
+1. 细节点插件装配 (Slot Mixins)：
+   - slot_elevation: plugin_flat_zen (彻底零阴影，严禁任何 shadow 类名，纯粹依靠中性灰色阶 bg-neutral-900/950 与 1px 细线框 border-neutral-800 构建信息层级)；
+   - slot_layout: 高密自适应网格 + 表格数据流；
+   - slot_palette: 纯黑白灰阶 + 翡翠绿 (emerald-400) 状态指示灯；
+   - slot_interaction: plugin_tactile_bounce；
+2. 业务功能模块：
+   - QPS 负载 (1,489,204)、P99 延迟 (14.2ms)、缓存命中率等宽数字大盘；
+   - 全球主要 PoP 接入点表格 (Tokyo、Singapore、Frankfurt、San Jose 实时流量与 RTT)；
+   - 实时 Anycast BGP 调度路由终端控制台日志；
+3. 输出自包含单文件 HTML。`,
+
+      lumina: `请使用【Pluggable UI Designer】技能为我设计一个简约多色相微粉彩风格的【多维创作者灵感与内容工作台】：
+1. 细节点插件装配 (Slot Mixins)：
+   - slot_elevation: plugin_soft_diffusion (柔和弥散轻投影，通透悬浮)；
+   - slot_layout: plugin_bento_grid (Bento 便签网格)；
+   - slot_palette: multi_accent_pastel (以极简米白 #faf9f6 为画布，融入 5 重低饱和度语义色彩：紫-深度专栏、绿-视频就绪、橙-拍摄排期、蓝-传播罗盘、粉-情绪板)；
+   - slot_interaction: plugin_tactile_bounce；
+2. 业务功能模块：
+   - 主角长文选题大卡 (带 Mood Swatches 情绪调色盘)；
+   - 4K 视频发布就绪轨道卡、明日访谈录制排期卡、跨平台传播增长条状对比卡与视觉情绪板；
+3. 严格遵循 WCAG AA 4.5:1 无障碍高对比度，输出自包含单文件 HTML。`,
+
+      spotlight: `请为我设计一个带有【指针跟随聚光灯发丝线边框】与【VisionOS 液态毛玻璃卡片】的前端实验室页面：
+1. 聚光灯：监听 mousemove 坐标，注入 --mouse-x/--mouse-y，通过 mask-composite: exclude 创建仅在光标附近点亮的流光发丝边框与表面漫反射；
+2. 毛玻璃：背景衬以低频呼吸多色环境光球 (blur-[90px])，卡片采用 backdrop-blur-xl (20px+) 结合半透明深黑底层与镜面内切高光发丝边框；
+3. 输出自包含单文件 HTML。`
+    };
+
+    function copyTemplatePrompt(key) {
+      const prompt = TEMPLATE_PROMPTS[key];
+      if (!prompt) return;
+
+      navigator.clipboard.writeText(prompt).then(() => {
+        showToast('该模板的完整 AI 提示词已复制！可直接黏贴给 AI 复刻');
+      }).catch(err => {
+        console.error('Copy failed', err);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      if (!toast || !toastMsg) return;
+
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // 模板筛选逻辑
+    function filterTemplates(category) {
+      const cards = document.querySelectorAll('.template-card');
+      const buttons = document.querySelectorAll('.market-btn');
+
+      buttons.forEach(btn => btn.classList.remove('bg-indigo-600', 'text-white'));
+      event.target.classList.add('bg-indigo-600', 'text-white');
+
+      cards.forEach(card => {
+        if (category === 'all' || card.dataset.category === category) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>

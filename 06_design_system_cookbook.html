@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>主流效果与组件 AI 提示词工坊 - Pluggable UI Designer Cookbook</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              400: '#818cf8',
+              500: '#6366f1',
+              600: '#4f46e5',
+            },
+            slate: {
+              850: '#111827',
+              900: '#0f172a',
+              950: '#070b14',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SF Mono"', 'Consolas', 'monospace'],
+          },
+          animation: {
+            'shimmer-spin': 'shimmerSpin 4s linear infinite',
+            'pulse-fast': 'pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'shimmer-text': 'shimmerText 3s linear infinite',
+          },
+          keyframes: {
+            shimmerSpin: {
+              '0%': { transform: 'rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg)' },
+            },
+            shimmerText: {
+              '0%': { backgroundPosition: '200% 0' },
+              '100%': { backgroundPosition: '-200% 0' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* 聚光灯边框通用微样式 */
+    .mini-spotlight {
+      position: relative;
+      background: rgba(15, 23, 42, 0.85);
+      border-radius: 0.75rem;
+      overflow: hidden;
+    }
+    .mini-spotlight::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: radial-gradient(
+        220px circle at var(--mouse-x, -999px) var(--mouse-y, -999px),
+        rgba(6, 182, 212, 0.75),
+        transparent 80%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .mini-spotlight:hover::before {
+      opacity: 1;
+    }
+
+    /* 点阵微背景 */
+    .bg-dot-matrix {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+      background-size: 16px 16px;
+    }
+
+    /* 噪点质感 */
+    .bg-noise {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 0);
+      background-size: 4px 4px;
+    }
+
+    /* 流光旋转流动边框 */
+    .shimmer-border-box {
+      position: relative;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      padding: 1px;
+    }
+    .shimmer-border-box::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(transparent, rgba(99, 102, 241, 0.8), transparent 30%);
+      animation: shimmerSpin 4s linear infinite;
+    }
+
+    /* 3D 倾斜卡片容器 */
+    .tilt-card-container {
+      perspective: 800px;
+    }
+    .tilt-card-inner {
+      transition: transform 0.15s ease-out;
+      transform-style: preserve-3d;
+    }
+  </style>
+</head>
+<body class="bg-[#070b14] text-slate-100 antialiased min-h-screen flex flex-col font-sans selection:bg-indigo-500/30 selection:text-indigo-200">
+
+  <!-- 全局轻量 Toast 提示框 -->
+  <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-2 bg-slate-900 border border-emerald-500/50 text-white px-4 py-2.5 rounded-xl shadow-[0_10px_25px_rgba(0,0,0,0.5)] font-mono text-xs">
+    <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+    <span id="toast-msg">已成功复制到剪贴板！</span>
+  </div>
+
+  <!-- 顶栏导航 -->
+  <header class="border-b border-white/10 bg-[#070b14]/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="h-9 w-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white hover:bg-white/10 transition-all">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </a>
+        <div>
+          <h1 class="text-base font-semibold text-white tracking-tight flex items-center gap-2">
+            设计系统与 AI 提示词配方工坊
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">20 RECIPES</span>
+          </h1>
+          <p class="text-xs text-slate-400 font-mono">20 款业界主流效果与业务组件 · 一键提取 AI 提示词与 Tailwind 代码</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="text-xs font-mono text-slate-400 hover:text-white transition-colors flex items-center gap-1.5">
+          <i data-lucide="layout-grid" class="w-3.5 h-3.5"></i>
+          返回模板市场
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体工作区 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-6 py-10 space-y-8">
+
+    <!-- 介绍 Hero -->
+    <div class="space-y-3 max-w-3xl">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/70 border border-indigo-800/40 text-xs font-mono text-indigo-300">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span>覆盖 Linear、Apple、Raycast、Vercel 核心设计手艺</span>
+      </div>
+      <h2 class="text-3xl font-bold tracking-tight text-white">20 款主流效果与组件：拿来即用的设计配方</h2>
+      <p class="text-sm text-slate-400 leading-relaxed">
+        大模型具备极高的基座审美。当您在开发中需要加入“流动边框、聚光灯、毛玻璃、动态岛导航、Cmd+K 命令面板”等高频主流效果时，无需重写复杂说明，直接在下方点击 <strong>「复制 AI 提示词」</strong> 黏贴给 AI，即可秒级复刻同款高质感！
+      </p>
+    </div>
+
+    <!-- 交互式分类筛选 Tab 按钮 -->
+    <div class="flex flex-wrap items-center gap-2 border-b border-white/10 pb-4 text-xs font-mono">
+      <button onclick="filterRecipes('all')" class="filter-btn active px-3.5 py-1.5 rounded-lg bg-indigo-600 text-white font-medium transition-all shadow-sm">
+        全部配方 (20)
+      </button>
+      <button onclick="filterRecipes('surface')" class="filter-btn px-3.5 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-300 hover:text-white transition-all">
+        光影质感与底纹 (7)
+      </button>
+      <button onclick="filterRecipes('interaction')" class="filter-btn px-3.5 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-300 hover:text-white transition-all">
+        前沿微交互与动效 (5)
+      </button>
+      <button onclick="filterRecipes('component')" class="filter-btn px-3.5 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-300 hover:text-white transition-all">
+        高频核心业务组件 (6)
+      </button>
+      <button onclick="filterRecipes('layout')" class="filter-btn px-3.5 py-1.5 rounded-lg bg-slate-900 border border-white/10 text-slate-300 hover:text-white transition-all">
+        色彩体系与布局 (2)
+      </button>
+    </div>
+
+    <!-- 20 款主流配方卡片网格 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="recipes-grid">
+
+      <!-- ============================================== -->
+      <!-- 01: 精工发丝线与顶部高光 (Fine Hairline) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="surface">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2 py-0.5 rounded">01 · SURFACE</span>
+            <span class="text-[11px] text-slate-500 font-mono">Linear 极客感</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">精工发丝线与顶部微高光</h3>
+            <p class="text-xs text-slate-400 mt-1">1px 极弱微描边 + 顶部内发光高光，坚实紧密。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5">
+            <div class="relative rounded-xl border border-white/10 bg-slate-900/80 p-3 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 font-mono">健康度 (SLA)</span>
+                <div class="text-lg font-bold font-mono text-white">99.985%</div>
+              </div>
+              <span class="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-cyan-400 text-[10px] font-mono">STABLE</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_01')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_01')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 02: 柔和双层大弥散轻投影 (Soft Diffusion) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="surface">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-amber-400 bg-amber-950/60 border border-amber-800/60 px-2 py-0.5 rounded">02 · SURFACE</span>
+            <span class="text-[11px] text-slate-500 font-mono">Apple / Stripe</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">柔和双层大弥散轻投影</h3>
+            <p class="text-xs text-slate-400 mt-1">超大扩散半径、低透明度双层浅投影，自然悬浮。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-[#faf9f6] text-stone-800">
+            <div class="rounded-xl border border-stone-200/80 bg-white p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04),0_2px_8px_rgb(0,0,0,0.02)] flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-stone-500 font-serif">深度洞见</span>
+                <div class="text-xs font-semibold text-stone-900 font-serif">设计的本质是意图的透明</div>
+              </div>
+              <i data-lucide="bookmark" class="w-3.5 h-3.5 text-amber-600"></i>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_02')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_02')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 03: 素雅功能纯扁平 (Flat Zen) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="surface">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded">03 · SURFACE</span>
+            <span class="text-[11px] text-slate-500 font-mono">零阴影功能主义</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">素雅功能纯扁平</h3>
+            <p class="text-xs text-slate-400 mt-1">彻底零阴影，依靠微差色阶与发丝线，极致信噪比。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-neutral-950 border border-neutral-800">
+            <div class="bg-neutral-900 border border-neutral-800 p-2.5 flex items-center justify-between font-mono text-xs">
+              <div>
+                <span class="text-neutral-500 text-[9px] uppercase">NRT-01 (Tokyo)</span>
+                <div class="text-xs font-bold text-white">8.2 ms · 38Gbps</div>
+              </div>
+              <span class="text-emerald-400 text-[10px] font-bold">● ONLINE</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_03')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_03')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 04: VisionOS 液态环境毛玻璃 (Frosted Glass) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="surface">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-purple-400 bg-purple-950/60 border border-purple-800/60 px-2 py-0.5 rounded">04 · SURFACE</span>
+            <span class="text-[11px] text-slate-500 font-mono">VisionOS 质感</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">液态环境高斯毛玻璃</h3>
+            <p class="text-xs text-slate-400 mt-1">Backdrop-blur 20px+ 结合晶体切身高光边缘折射。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 relative overflow-hidden border border-white/5">
+            <div class="absolute -top-4 -left-4 w-16 h-16 bg-purple-500/40 rounded-full blur-lg"></div>
+            <div class="absolute -bottom-4 -right-4 w-16 h-16 bg-cyan-500/40 rounded-full blur-lg"></div>
+            <div class="relative z-10 rounded-xl p-3 border border-white/20 bg-slate-900/40 backdrop-blur-xl shadow-lg flex items-center justify-between font-mono text-xs">
+              <span class="text-white text-xs">Glass Panel</span>
+              <span class="text-purple-300 text-[10px]">Blur: 20px</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_04')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_04')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 05: 炫彩渐变旋转流动边框 (Shimmer Border) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="surface">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-indigo-400 bg-indigo-950/60 border border-indigo-800/60 px-2 py-0.5 rounded">05 · SURFACE</span>
+            <span class="text-[11px] text-slate-500 font-mono">Magic UI 风格</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">炫彩旋转流动微边框</h3>
+            <p class="text-xs text-slate-400 mt-1">Conic-gradient 旋转流光动画，边框如同光带流转。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 flex items-center justify-center">
+            <div class="shimmer-border-box w-full">
+              <div class="relative z-10 bg-slate-900/90 px-4 py-2.5 rounded-[inherit] flex items-center justify-between text-xs font-mono">
+                <span class="text-indigo-300 font-bold">AI 智能推理管线</span>
+                <span class="text-[10px] text-slate-400">RUNNING...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_05')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_05')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 06: 极客渐变微点阵背景 (Dot Matrix Grid) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="surface">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded">06 · SURFACE</span>
+            <span class="text-[11px] text-slate-500 font-mono">SaaS 工业底纹</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">渐变微点阵网格背景</h3>
+            <p class="text-xs text-slate-400 mt-1">16px 点阵与径向渐变遮罩，告别死板纯黑底色。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 relative overflow-hidden h-20 bg-dot-matrix flex items-center justify-center">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
+            <span class="relative z-10 text-xs font-mono text-slate-300 bg-slate-900/80 px-2.5 py-1 rounded border border-white/10">点阵微底纹</span>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_06')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_06')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 07: 胶片磨砂微噪点质感 (Subtle Grain) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="surface">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded">07 · SURFACE</span>
+            <span class="text-[11px] text-slate-500 font-mono">自然胶片感</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">磨砂胶片微噪点表面</h3>
+            <p class="text-xs text-slate-400 mt-1">模拟真实纸质/胶片颗粒，消除数字廉价塑料感。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 bg-noise h-20 flex items-center justify-center">
+            <span class="text-xs font-mono text-slate-300 bg-slate-900/90 px-3 py-1 rounded-md border border-white/10">微噪点纹理表面</span>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_07')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_07')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 08: 指针跟随流光聚光灯 (Spotlight Border) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="interaction">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-800/60 px-2 py-0.5 rounded">08 · INTERACTION</span>
+            <span class="text-[11px] text-slate-500 font-mono">Linear 追光</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">指针跟随聚光灯流光描边</h3>
+            <p class="text-xs text-slate-400 mt-1">通过 mask-composite 遮罩在鼠标附近点亮 1px 细线。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5">
+            <div class="mini-spotlight border border-white/10 p-3" onmousemove="updateSpotlight(event, this)">
+              <div class="relative z-10 flex items-center justify-between font-mono text-xs">
+                <span class="text-cyan-400 text-xs">晃动鼠标照亮边框</span>
+                <span class="text-slate-500 text-[10px]">60 FPS</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_08')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_08')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 09: 3D 悬浮透视倾斜卡片 (3D Tilt Card) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="interaction">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-pink-400 bg-pink-950/60 border border-pink-800/60 px-2 py-0.5 rounded">09 · INTERACTION</span>
+            <span class="text-[11px] text-slate-500 font-mono">立体透视</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">3D 悬浮鼠标跟随透视倾斜</h3>
+            <p class="text-xs text-slate-400 mt-1">随着光标位置产生真实 3D 倾角与高光位移。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 tilt-card-container flex items-center justify-center">
+            <div class="tilt-card-inner bg-slate-900 border border-white/15 p-3 rounded-xl w-full text-center text-xs font-mono text-pink-300 cursor-pointer" onmousemove="handleTilt(event, this)" onmouseleave="resetTilt(this)">
+              鼠标划过卡片产生立体微倾斜
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_09')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_09')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 10: 物理弹性微触感按压 (Tactile Bounce) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="interaction">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-rose-400 bg-rose-950/60 border border-rose-800/60 px-2 py-0.5 rounded">10 · INTERACTION</span>
+            <span class="text-[11px] text-slate-500 font-mono">机械按键手感</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">物理按压弹性微凹陷</h3>
+            <p class="text-xs text-slate-400 mt-1">浮起 (-translate-y-0.5) 与微凹 (active:scale-95)。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 flex items-center justify-center gap-2">
+            <button class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all duration-150 hover:-translate-y-0.5 active:scale-95 shadow-sm">
+              按压体验回弹
+            </button>
+            <button class="px-3 py-1.5 rounded-lg bg-slate-800 border border-white/10 text-slate-200 text-xs transition-all duration-150 hover:-translate-y-0.5 active:scale-95">
+              次级按键
+            </button>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_10')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_10')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 11: 流光呼吸渐变文字 (Shimmer Gradient Text) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="interaction">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-amber-400 bg-amber-950/60 border border-amber-800/60 px-2 py-0.5 rounded">11 · INTERACTION</span>
+            <span class="text-[11px] text-slate-500 font-mono">Apple Intelligence</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">流光高光渐变呼吸字体</h3>
+            <p class="text-xs text-slate-400 mt-1">光带在标题字体上循环流动扫过，突出 AI 智能感。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 flex items-center justify-center">
+            <span class="text-base font-extrabold font-mono tracking-tight bg-gradient-to-r from-slate-400 via-white to-slate-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer-text">
+              ✨ Next-Gen Neural Engine
+            </span>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_11')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_11')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 12: 状态脉冲呼吸发光环 (Status Glow Pulse) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="interaction">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded">12 · INTERACTION</span>
+            <span class="text-[11px] text-slate-500 font-mono">探活与在线状态</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">双层状态脉冲发光环</h3>
+            <p class="text-xs text-slate-400 mt-1">内层实心圆点 + 外层扩散 ping 光晕，直观表达实时探活。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 flex items-center justify-center gap-4 text-xs font-mono">
+            <span class="flex items-center gap-2 text-emerald-400">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              集群在线
+            </span>
+            <span class="flex items-center gap-2 text-amber-400">
+              <span class="relative flex h-2 w-2">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+              </span>
+              流量预警
+            </span>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_12')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_12')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 13: 悬浮胶囊动态岛导航 (Floating Island Nav) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="component">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-blue-400 bg-blue-950/60 border border-blue-800/60 px-2 py-0.5 rounded">13 · COMPONENT</span>
+            <span class="text-[11px] text-slate-500 font-mono">动态岛导航</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">悬浮毛玻璃胶囊导航条</h3>
+            <p class="text-xs text-slate-400 mt-1">居中悬浮、超轻圆角药丸、微高光发丝边与状态指示。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 flex items-center justify-center">
+            <div class="bg-slate-900/80 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-full shadow-lg flex items-center gap-3 text-xs font-mono">
+              <span class="text-white font-bold">Lumina</span>
+              <span class="text-slate-400 hover:text-white transition-colors cursor-pointer">功能</span>
+              <span class="text-slate-400 hover:text-white transition-colors cursor-pointer">文档</span>
+              <span class="px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px]">v1.0</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_13')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_13')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 14: Cmd+K 全局快捷键命令面板 (Command Palette) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="component">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-violet-400 bg-violet-950/60 border border-violet-800/60 px-2 py-0.5 rounded">14 · COMPONENT</span>
+            <span class="text-[11px] text-slate-500 font-mono">Raycast 交互标配</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">Cmd+K 极客快捷命令面板</h3>
+            <p class="text-xs text-slate-400 mt-1">搜索框 + 动作建议列表 + 键盘指示标，沉浸式操控。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 font-mono text-xs space-y-2">
+            <div class="flex items-center gap-2 bg-slate-900 border border-white/10 px-2.5 py-1.5 rounded-lg text-slate-300">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-500"></i>
+              <span class="text-[11px] text-slate-400">输入命令或检索...</span>
+              <kbd class="ml-auto bg-slate-800 px-1.5 py-0.2 rounded border border-white/10 text-[9px]">⌘K</kbd>
+            </div>
+            <div class="text-[10px] text-slate-500 flex justify-between px-1">
+              <span>跳转至代码审查</span>
+              <span class="text-slate-400">↵ 回车</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_14')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_14')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 15: 等宽指标与数据微趋势卡 (Tabular Metrics) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="component">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-teal-400 bg-teal-950/60 border border-teal-800/60 px-2 py-0.5 rounded">15 · COMPONENT</span>
+            <span class="text-[11px] text-slate-500 font-mono">金融与大盘指标</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">等宽指标与数据微趋势卡</h3>
+            <p class="text-xs text-slate-400 mt-1">tabular-nums 对齐数字，配合涨跌微胶囊与微条形柱。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 font-mono text-xs">
+            <div class="flex items-center justify-between text-slate-400 text-[10px]">
+              <span>月度活跃算力 Token</span>
+              <span class="text-emerald-400">+18.4%</span>
+            </div>
+            <div class="text-xl font-bold text-white tracking-tight mt-1 tabular-nums">48,920,400</div>
+            <div class="flex gap-1 mt-2 h-1.5 w-full bg-slate-900 rounded overflow-hidden">
+              <span class="bg-indigo-500 w-2/3"></span>
+              <span class="bg-cyan-400 w-1/4"></span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_15')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_15')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 16: 代码高亮 Diff 差异对比审查行 (Code Diff) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="component">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-rose-400 bg-rose-950/60 border border-rose-800/60 px-2 py-0.5 rounded">16 · COMPONENT</span>
+            <span class="text-[11px] text-slate-500 font-mono">GitHub / GitLab</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">代码审查 Diff 差异对比行</h3>
+            <p class="text-xs text-slate-400 mt-1">红绿半透明色阶背景，行号对齐与清晰变动指示。</p>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-950 border border-white/10 font-mono text-[11px] space-y-1">
+            <div class="text-rose-400/90 bg-rose-950/30 px-2 py-0.5 rounded flex items-center gap-2">
+              <span class="text-slate-600 w-4 text-right">88</span>
+              <span>- cache.Set(key, val)</span>
+            </div>
+            <div class="text-emerald-400/90 bg-emerald-950/30 px-2 py-0.5 rounded flex items-center gap-2">
+              <span class="text-slate-600 w-4 text-right">88</span>
+              <span>+ syncMap.Store(key, val)</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_16')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_16')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 17: 丝滑手风琴折叠面板 (Fluid Accordion) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="component">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-slate-300 bg-slate-800 px-2 py-0.5 rounded">17 · COMPONENT</span>
+            <span class="text-[11px] text-slate-500 font-mono">FAQ 与设置折叠</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">无缝微过渡手风琴折叠卡</h3>
+            <p class="text-xs text-slate-400 mt-1">箭头平滑旋转，内容平滑展开，收放自如。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5">
+            <div class="border border-white/10 rounded-lg p-2.5 bg-slate-900/80 cursor-pointer" onclick="toggleAccordion(this)">
+              <div class="flex items-center justify-between text-xs font-medium text-slate-200">
+                <span>如何接入 Slot Mixin 插件？</span>
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform duration-200"></i>
+              </div>
+              <p class="accordion-content hidden text-[11px] text-slate-400 mt-2 pt-2 border-t border-white/5 leading-relaxed">
+                只需在给 AI 下达指令时声明所需的 slot_elevation 与 slot_palette 即可热插拔！
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_17')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_17')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 18: 悬浮状态通知浮窗 (Toast Notification) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="component">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/60 px-2 py-0.5 rounded">18 · COMPONENT</span>
+            <span class="text-[11px] text-slate-500 font-mono">反馈浮窗</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">悬浮磨砂状态反馈浮窗</h3>
+            <p class="text-xs text-slate-400 mt-1">深黑磨砂底 + 状态发光边框 + 阴影投影。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5 flex items-center justify-center">
+            <div class="bg-slate-900/90 border border-emerald-500/40 shadow-lg px-3 py-2 rounded-xl flex items-center gap-2 text-xs font-mono text-slate-200">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i>
+              <span>部署 Patch 已应用到集群</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_18')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_18')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 19: 多色相微粉彩标签体系 (Multi-Accent Pastel) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="layout">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-violet-400 bg-violet-950/60 border border-violet-800/60 px-2 py-0.5 rounded">19 · PALETTE</span>
+            <span class="text-[11px] text-slate-500 font-mono">WCAG AA 4.5:1</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">多色相微粉彩标签体系</h3>
+            <p class="text-xs text-slate-400 mt-1">紫、绿、橙、蓝低饱和多维色彩系统，高对比度。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-[#faf9f6]">
+            <div class="flex flex-wrap gap-1.5 text-[10px] font-mono">
+              <span class="px-2 py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200">#Violet-创意</span>
+              <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">#Mint-就绪</span>
+              <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">#Peach-排期</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_19')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_19')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+      <!-- ============================================== -->
+      <!-- 20: Bento Grid 错落模块网格 (Bento Layout) -->
+      <!-- ============================================== -->
+      <div class="recipe-card rounded-2xl border border-white/10 bg-slate-900/60 p-5 shadow-sm flex flex-col justify-between" data-category="layout">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold text-blue-400 bg-blue-950/60 border border-blue-800/60 px-2 py-0.5 rounded">20 · LAYOUT</span>
+            <span class="text-[11px] text-slate-500 font-mono">现代便签网格</span>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">Bento 错落智能模块网格</h3>
+            <p class="text-xs text-slate-400 mt-1">主角大卡跨 2 列 2 行，疏密有致的视觉韵律。</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-950 border border-white/5">
+            <div class="grid grid-cols-3 gap-1.5 text-[9px] font-mono">
+              <div class="col-span-2 bg-slate-900 border border-white/10 p-2 rounded text-slate-300">跨2列焦点大卡</div>
+              <div class="col-span-1 bg-slate-900 border border-white/10 p-2 rounded text-center text-white font-bold">单格卡</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-4 pt-3 border-t border-white/10 flex items-center gap-2">
+          <button onclick="copySnippet('prompt_20')" class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-mono font-bold text-xs transition-all active:scale-95 flex items-center justify-center gap-1">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> 复制 Prompt
+          </button>
+          <button onclick="copySnippet('code_20')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs transition-all active:scale-95">代码</button>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="border-t border-white/10 py-8 text-center text-xs font-mono text-slate-500 bg-[#070b14]/90">
+    20 Production-Ready Design Recipes & Prompts · Powered by Pluggable UI Designer
+  </footer>
+
+  <!-- 20 项提示词与代码字典 -->
+  <script>
+    lucide.createIcons();
+
+    const SNIPPETS = {
+      prompt_01: `请为我设计卡片质感，挂载【精工发丝线 (slot_elevation: plugin_fine_hairline)】：
+1. 卡片边框使用 1px 极弱微描边 (border border-white/10 或 border-zinc-800)；
+2. 顶部使用内发光高光 (shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)])；
+3. 卡片表面底色采用微通透磨砂暗黑 (bg-zinc-900/80)，严禁使用大面积沉重大黑影。`,
+      code_01: `<div class="rounded-xl border border-white/10 bg-zinc-900/80 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] hover:border-white/20 transition-all">
+  <div class="text-xs font-medium text-zinc-400">指标</div>
+  <div class="mt-2 text-2xl font-bold text-white font-mono">99.98%</div>
+</div>`,
+
+      prompt_02: `请为我设计卡片质感，挂载【柔和轻弥散投影 (slot_elevation: plugin_soft_diffusion)】：
+1. 采用超柔和、大扩散半径、低透明度双层投影：shadow-[0_8px_30px_rgb(0,0,0,0.04),0_2px_8px_rgb(0,0,0,0.02)]；
+2. 悬停状态提升浮动层次：hover:shadow-[0_16px_40px_rgb(0,0,0,0.08)] hover:-translate-y-0.5；
+3. 营造悬浮于界面的轻盈空气感。`,
+      code_02: `<div class="rounded-2xl border border-stone-200/80 bg-white p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04),0_2px_8px_rgb(0,0,0,0.02)] hover:shadow-[0_16px_40px_rgb(0,0,0,0.08)] hover:-translate-y-0.5 transition-all">
+  <h3 class="text-lg font-semibold text-stone-900">标题</h3>
+</div>`,
+
+      prompt_03: `请为我设计卡片质感，挂载【素雅纯扁平 (slot_elevation: plugin_flat_zen)】：
+1. 彻底剔除任何形式的阴影 (严禁使用任何 shadow)；
+2. 完全依靠微弱中性灰色阶对比 (bg-neutral-900/950) 与 1px 细线框 (border-neutral-800) 构建层级；
+3. 数据采用等宽字体 (font-mono)，突出高信噪比功能主义。`,
+      code_03: `<div class="border border-neutral-800 bg-neutral-900 p-4">
+  <div class="text-xs font-mono text-neutral-400 uppercase">QPS</div>
+  <div class="text-2xl font-bold font-mono text-white mt-1">1,489,204</div>
+</div>`,
+
+      prompt_04: `请为我设计【Apple VisionOS 质感的液态毛玻璃卡片】：
+1. 背景衬以低频呼吸波动的彩色环境漫反射光球 (blur-[90px] animate-blob)；
+2. 卡片使用双层磨砂滤镜：backdrop-blur-xl (20px+) 结合半透明深黑底层 (bg-slate-900/45)；
+3. 边框采用细发丝镜面高光 (border border-white/15 配合 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)])。`,
+      code_04: `<div class="backdrop-blur-xl bg-slate-900/45 border border-white/15 rounded-2xl p-6 shadow-[0_16px_40px_0_rgba(0,0,0,0.35),inset_0_1px_0_0_rgba(255,255,255,0.2)]">
+  <h3 class="text-white font-bold">VisionOS Frosted Panel</h3>
+</div>`,
+
+      prompt_05: `请为我设计一个带有【炫彩渐变旋转流动边框 (Shimmer Border)】的卡片组件：
+1. 外层相对定位容器设置 padding: 1px 与 overflow: hidden；
+2. ::before 伪元素使用 conic-gradient(transparent, rgba(99,102,241,0.8), transparent 30%)，以中心点 4s 无限循环旋转；
+3. 内层内容层使用 bg-slate-900/90 遮挡，呈现纯净流动的光纤微边框。`,
+      code_05: `<div class="relative rounded-xl p-[1px] overflow-hidden">
+  <div class="absolute -inset-[100%] bg-[conic-gradient(transparent,rgba(99,102,241,0.8),transparent_30%)] animate-[spin_4s_linear_infinite]"></div>
+  <div class="relative z-10 bg-slate-900/95 p-4 rounded-[inherit]">
+    <div class="text-white text-sm font-mono">流光边框卡片</div>
+  </div>
+</div>`,
+
+      prompt_06: `请为我设计一个带有【极客微点阵背景 (Dot Matrix Background)】的区域底纹：
+1. 使用 radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px) 作为背景图；
+2. 设置 background-size: 16px 16px 构建精致的 16px 间距微点阵；
+3. 配合径向渐变遮罩 (mask-image)，产生中间清晰、向四周平滑淡出的高阶质感。`,
+      code_06: `<div class="relative bg-slate-950 bg-[radial-gradient(rgba(255,255,255,0.12)_1px,transparent_1px)] bg-[size:16px_16px] p-8">
+  <div class="absolute inset-0 bg-gradient-to-t from-slate-950 to-transparent"></div>
+</div>`,
+
+      prompt_07: `请为我的深色界面加入【胶片磨砂微噪点质感 (Subtle Noise Texture)】：
+1. 使用微噪点纹理或微细网格，消除数字界面死板单调的纯黑色；
+2. 带来类似摄影胶片或哑光纸张的温润触感，增强空间层次。`,
+      code_07: `<div class="bg-slate-950 bg-[radial-gradient(rgba(255,255,255,0.04)_1px,transparent_0)] bg-[size:4px_4px] p-6">
+  <span class="text-slate-300">噪点表面</span>
+</div>`,
+
+      prompt_08: `请为卡片实现【指针跟随流光聚光灯描边 (Spotlight Border)】：
+1. 监听 mousemove 坐标，注入 CSS 变量 --mouse-x 与 --mouse-y；
+2. 使用 ::before 伪元素结合 mask-composite: exclude 创建仅在光标附近 350px 扇区点亮的高光边框；
+3. 离开卡片时光斑平滑淡出。`,
+      code_08: `.spotlight-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(350px circle at var(--mouse-x) var(--mouse-y), rgba(6,182,212,0.7), transparent 80%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}`,
+
+      prompt_09: `请为卡片加入【3D 悬浮透视鼠标跟随倾斜 (3D Tilt Card)】：
+1. 父容器设置 perspective: 800px；
+2. 监听鼠标在卡片内的移动，依据中心点相对偏移计算 rotateX 与 rotateY (幅度约 ±8deg)；
+3. 鼠标离开时自动平滑回弹复原。`,
+      code_09: `function handleTilt(e, card) {
+  const r = card.getBoundingClientRect();
+  const x = (e.clientX - r.left) / r.width - 0.5;
+  const y = (e.clientY - r.top) / r.height - 0.5;
+  card.style.transform = \`rotateY(\${x * 16}deg) rotateX(\${-y * 16}deg)\`;
+}`,
+
+      prompt_10: `请为按钮与交互元素挂载【真实物理按压微触感 (slot_interaction: plugin_tactile_bounce)】：
+1. 悬浮轻微浮起 (hover:-translate-y-0.5 duration-150)；
+2. 鼠标按压/点击时产生微凹陷机械感形变 (active:scale-[0.97] 或 active:scale-95)；
+3. 避免过度弹跳，保持扎实清脆的机械手感。`,
+      code_10: `<button class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-medium transition-all duration-150 hover:-translate-y-0.5 active:scale-95 shadow-sm">
+  机械回弹按键
+</button>`,
+
+      prompt_11: `请为重点标题应用【流光呼吸渐变字体 (Shimmer Text)】：
+1. 使用 bg-gradient-to-r 从中性色到亮白光带再到中性色；
+2. 配置 bg-[length:200%_auto] 与 bg-clip-text text-transparent；
+3. 通过 CSS 动画平滑循环位移 background-position，产生如 Apple 智能光辉扫过的质感。`,
+      code_11: `<h2 class="text-2xl font-bold bg-gradient-to-r from-slate-400 via-white to-slate-400 bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmerText_3s_linear_infinite]">
+  ✨ 神经生成流光标题
+</h2>`,
+
+      prompt_12: `请为实时监控状态设计【双层脉冲呼吸状态发光环 (Status Glow Pulse)】：
+1. 内层固定实心小圆点 (h-2 w-2 rounded-full bg-emerald-500)；
+2. 外层使用同大小圆点，配置 animate-ping 产生向外扩散淡出的光晕涟漪；
+3. 适用于微服务探活、实时在线、网络连接等高频场景。`,
+      code_12: `<span class="relative flex h-2 w-2">
+  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+</span>`,
+
+      prompt_13: `请为我设计一个【悬浮毛玻璃胶囊动态岛导航 (Floating Island Nav)】：
+1. 居中悬浮药丸造型 (rounded-full)，背景采用 backdrop-blur-md 与半透明底色；
+2. 配备细发丝描边 (border border-white/15) 与立体软阴影 (shadow-xl)；
+3. 紧凑内联品牌 Logo、核心 Tab 与状态标签，极具未来感。`,
+      code_13: `<nav class="fixed top-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/80 backdrop-blur-md border border-white/15 px-4 py-2 rounded-full shadow-2xl flex items-center gap-4 text-xs font-mono">
+  <span class="font-bold text-white">Brand</span>
+  <a href="#" class="text-slate-400 hover:text-white">控制台</a>
+</nav>`,
+
+      prompt_14: `请为我的 SaaS 系统设计一个【Cmd+K 全局快捷键命令面板 (Command Palette)】：
+1. 类似 Raycast / Linear 的暗黑悬浮浮窗，支持模糊背景 (backdrop-blur-xl)；
+2. 顶部集成搜索框、搜索图标与键盘快捷键提示 (kbd 标签)；
+3. 下方提供分类动作列表与快捷高亮项。`,
+      code_14: `<div class="rounded-xl border border-white/15 bg-slate-900/90 backdrop-blur-xl p-4 shadow-2xl font-mono text-xs max-w-md w-full">
+  <div class="flex items-center gap-2 border-b border-white/10 pb-3">
+    <input type="text" placeholder="输入命令..." class="bg-transparent border-0 text-white focus:outline-none w-full" />
+    <kbd class="bg-white/10 px-1.5 py-0.5 rounded text-[10px]">ESC</kbd>
+  </div>
+</div>`,
+
+      prompt_15: `请为我设计一个【等宽指标卡与微趋势流 (Tabular Metrics Card)】：
+1. 涉及数字统计全部强制使用等宽字体 (font-mono 或 tabular-nums)，确保高低位对齐；
+2. 包含指标标题、当前绝对值、涨跌红绿微胶囊 (如 +12.4%)；
+3. 底部内联微型进度对比条，呈现直观信噪比。`,
+      code_15: `<div class="rounded-xl border border-white/10 bg-slate-900 p-4 font-mono">
+  <div class="text-xs text-slate-400 flex justify-between">
+    <span>QPS 吞吐</span>
+    <span class="text-emerald-400">+14.2%</span>
+  </div>
+  <div class="text-2xl font-bold text-white mt-1 tabular-nums">1,489,204</div>
+</div>`,
+
+      prompt_16: `请为我设计一个标准的【代码审查 Diff 对比行区块】：
+1. 采用深黑底色配合等宽字体与细边框；
+2. 删减行使用半透明红色背景 (bg-rose-950/30 text-rose-300)，行首附带减号；
+3. 增加行使用半透明绿色背景 (bg-emerald-950/30 text-emerald-300)，行首附带加号；
+4. 左侧行号保持等宽且灰度降低。`,
+      code_16: `<div class="rounded-lg bg-slate-950 border border-white/10 p-3 font-mono text-xs space-y-1">
+  <div class="bg-rose-950/30 text-rose-300 px-2 py-0.5 rounded flex gap-3">
+    <span class="text-slate-600 select-none">88</span><span>- 旧代码</span>
+  </div>
+  <div class="bg-emerald-950/30 text-emerald-300 px-2 py-0.5 rounded flex gap-3">
+    <span class="text-slate-600 select-none">88</span><span>+ 修复后代码</span>
+  </div>
+</div>`,
+
+      prompt_17: `请为我设计一个【丝滑平滑过渡手风琴折叠卡 (Fluid Accordion)】：
+1. 卡片点击时标题右侧图标产生 rotate-180 平滑旋转；
+2. 内容区域平滑显示，带有微弱内上边框分隔；
+3. 适用于设置项、FAQ 问答或折叠诊断详情。`,
+      code_17: `<div class="border border-white/10 rounded-xl p-3 bg-slate-900/60 cursor-pointer" onclick="toggleAccordion(this)">
+  <div class="flex justify-between items-center text-xs text-white">
+    <span>折叠标题</span><i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform duration-200"></i>
+  </div>
+  <div class="accordion-content hidden text-xs text-slate-400 mt-2 pt-2 border-t border-white/5">折叠内容...</div>
+</div>`,
+
+      prompt_18: `请为我设计一个【悬浮磨砂状态反馈浮窗 (Toast Notification)】：
+1. 位于右下角悬浮，配备深色磨砂底与细线状态描边 (border border-emerald-500/40)；
+2. 结合绿色/琥珀色状态图标，平滑淡入滑入；
+3. 轻量自包含，无需重型 UI 库依赖。`,
+      code_18: `<div class="fixed bottom-6 right-6 bg-slate-900/95 border border-emerald-500/40 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 font-mono text-xs">
+  <span class="text-emerald-400 font-bold">✓</span> 操作已成功执行
+</div>`,
+
+      prompt_19: `请为我设计一套【多色相微粉彩标签体系 (slot_palette: multi_accent_pastel)】：
+1. 以极简白底或暖白为画布，不使用大面积花哨渐变；
+2. 赋予不同业务维度低饱和度语义颜色：
+   - 紫罗兰 (bg-violet-50 text-violet-700 border-violet-200)
+   - 薄荷绿 (bg-emerald-50 text-emerald-700 border-emerald-200)
+   - 暖杏橙 (bg-amber-50 text-amber-700 border-amber-200)
+   - 天青蓝 (bg-sky-50 text-sky-700 border-sky-200)
+3. 严格符合 WCAG AA 4.5:1 对比度。`,
+      code_19: `<div class="flex gap-2">
+  <span class="px-2.5 py-1 rounded-lg bg-violet-50 text-violet-700 border border-violet-200 text-xs font-mono">#创意</span>
+  <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-mono">#就绪</span>
+</div>`,
+
+      prompt_20: `请为页面布局挂载【Bento 错落智能模块网格 (slot_layout: plugin_bento_grid)】：
+1. 使用 CSS Grid 不规则布局 (auto-rows-[minmax(180px,auto)])；
+2. 核心大卡跨 2 列 2 行 (md:col-span-2 md:row-span-2) 作为主要视觉锚点；
+3. 辅助指标卡单格分布，打破传统死板排版。`,
+      code_20: `<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 auto-rows-[minmax(180px,auto)]">
+  <div class="md:col-span-2 md:row-span-2 rounded-2xl border p-6">核心主角大卡</div>
+  <div class="rounded-2xl border p-5">单格指标卡</div>
+</div>`
+    };
+
+    function copySnippet(key) {
+      const text = SNIPPETS[key];
+      if (!text) return;
+      navigator.clipboard.writeText(text).then(() => {
+        showToast(key.startsWith('prompt') ? 'AI 提示词配方已复制！可直接黏贴给 AI 复刻' : '核心代码已复制到剪贴板！');
+      }).catch(err => {
+        console.error('Copy failed', err);
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      if (!toast || !toastMsg) return;
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 2500);
+    }
+
+    function filterRecipes(cat) {
+      const cards = document.querySelectorAll('.recipe-card');
+      const buttons = document.querySelectorAll('.filter-btn');
+      buttons.forEach(btn => btn.classList.remove('bg-indigo-600', 'text-white'));
+      event.target.classList.add('bg-indigo-600', 'text-white');
+      cards.forEach(card => {
+        if (cat === 'all' || card.dataset.category === cat) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    function updateSpotlight(e, el) {
+      const rect = el.getBoundingClientRect();
+      el.style.setProperty('--mouse-x', `${Math.round(e.clientX - rect.left)}px`);
+      el.style.setProperty('--mouse-y', `${Math.round(e.clientY - rect.top)}px`);
+    }
+
+    function handleTilt(e, card) {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      card.style.transform = `rotateY(${x * 16}deg) rotateX(${-y * 16}deg)`;
+    }
+
+    function resetTilt(card) {
+      card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+    }
+
+    function toggleAccordion(el) {
+      const content = el.querySelector('.accordion-content');
+      const icon = el.querySelector('i');
+      if (content) {
+        content.classList.toggle('hidden');
+        if (icon) icon.classList.toggle('rotate-180');
+      }
+    }
+  </script>
+</body>
+</html>

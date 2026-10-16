@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chronos Review - AI 智能代码审查与漏洞巡检工作台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#111827',
+              900: '#0f172a',
+              950: '#070b14',
+            },
+            cyan: {
+              400: '#22d3ee',
+              500: '#06b6d4',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SF Mono"', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col font-sans selection:bg-cyan-500/30 selection:text-cyan-200">
+
+  <!-- 细节点插拔 Mixin 状态标识条 -->
+  <aside aria-label="细节点插拔插件状态" class="bg-slate-900/90 border-b border-white/10 px-4 py-1.5 flex items-center justify-between text-xs font-mono text-slate-300">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+      <span class="text-slate-400">[已挂载细节点插件]</span>
+      <span class="bg-slate-800 border border-white/10 px-2 py-0.5 rounded text-cyan-300">slot_elevation: plugin_fine_hairline</span>
+      <span class="bg-slate-800 border border-white/10 px-2 py-0.5 rounded text-cyan-300">slot_layout: plugin_sidebar_dock</span>
+      <span class="bg-slate-800 border border-white/10 px-2 py-0.5 rounded text-cyan-300">slot_palette: plugin_cold_slate</span>
+      <span class="bg-slate-800 border border-white/10 px-2 py-0.5 rounded text-cyan-300">slot_interaction: plugin_subtle_glow</span>
+    </div>
+    <span class="text-slate-400 hidden md:inline">暗黑精工发丝线 · 冷调石板灰 · 侧边 Dock 布局</span>
+  </aside>
+
+  <!-- 整体主容器（左侧 Dock + 右侧主工作区） -->
+  <div class="flex-1 flex overflow-hidden">
+
+    <!-- 槽位：slot_layout (plugin_sidebar_dock) -->
+    <nav aria-label="主导航栏" class="w-16 bg-slate-950 border-r border-white/10 flex flex-col items-center py-4 justify-between select-none z-20">
+      <div class="flex flex-col items-center gap-6 w-full">
+        <!-- Logo -->
+        <a href="#" class="h-10 w-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.2)] hover:border-cyan-400/50 transition-all">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </a>
+
+        <!-- 导航图标组 -->
+        <div class="flex flex-col gap-2 w-full px-2">
+          <a href="#" class="h-10 w-full rounded-lg bg-white/10 text-cyan-400 flex items-center justify-center relative group shadow-[inset_0_1px_0_0_rgba(255,255,255,0.15)]">
+            <span class="absolute left-0 top-2 bottom-2 w-0.5 bg-cyan-400 rounded-r"></span>
+            <i data-lucide="git-pull-request" class="w-5 h-5"></i>
+          </a>
+          <a href="#" class="h-10 w-full rounded-lg text-slate-400 hover:text-slate-100 hover:bg-white/5 flex items-center justify-center transition-all">
+            <i data-lucide="cpu" class="w-5 h-5"></i>
+          </a>
+          <a href="#" class="h-10 w-full rounded-lg text-slate-400 hover:text-slate-100 hover:bg-white/5 flex items-center justify-center transition-all">
+            <i data-lucide="terminal" class="w-5 h-5"></i>
+          </a>
+          <a href="#" class="h-10 w-full rounded-lg text-slate-400 hover:text-slate-100 hover:bg-white/5 flex items-center justify-center transition-all">
+            <i data-lucide="activity" class="w-5 h-5"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- 底部辅助 -->
+      <div class="flex flex-col items-center gap-3 w-full px-2">
+        <a href="#" class="h-10 w-full rounded-lg text-slate-400 hover:text-slate-100 hover:bg-white/5 flex items-center justify-center transition-all">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+        </a>
+        <div class="h-8 w-8 rounded-full bg-slate-800 border border-white/20 flex items-center justify-center text-xs font-mono font-medium text-slate-300">
+          CH
+        </div>
+      </div>
+    </nav>
+
+    <!-- 右侧沉浸式主工作区 -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-slate-950">
+
+      <!-- 顶栏工具条 -->
+      <header class="h-14 border-b border-white/10 px-6 flex items-center justify-between bg-slate-950/80 backdrop-blur sticky top-0 z-10">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2 text-sm">
+            <span class="text-slate-400">Repositories</span>
+            <span class="text-slate-600">/</span>
+            <span class="font-semibold text-slate-200">infrastructure-gateway</span>
+            <span class="text-slate-600">/</span>
+            <span class="font-mono text-cyan-400 text-xs bg-cyan-950/60 border border-cyan-800/40 px-2 py-0.5 rounded">PR #482</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center gap-1.5 text-xs font-mono text-slate-400 bg-slate-900 border border-white/10 px-2.5 py-1 rounded-md">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Agent Engine v3.4 Active
+          </span>
+          <button class="px-3.5 py-1.5 text-xs font-medium bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg transition-all font-mono font-bold flex items-center gap-1.5 shadow-[0_0_15px_rgba(6,182,212,0.3)]">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
+            重新巡检
+          </button>
+        </div>
+      </header>
+
+      <!-- 工作台主内容区 -->
+      <div class="p-6 max-w-7xl w-full mx-auto space-y-6">
+
+        <!-- 页面主标题与概览 -->
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/10 pb-6">
+          <div>
+            <div class="flex items-center gap-3">
+              <h2 class="text-2xl font-bold tracking-tight text-white">PR #482 代码质量与安全诊断</h2>
+              <span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-2.5 py-0.5 rounded-full font-mono font-medium flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                发现 2 处高危脆弱性
+              </span>
+            </div>
+            <p class="text-sm text-slate-400 mt-1">
+              由 <span class="text-slate-300 font-medium">@alex-dev</span> 提交于 24 分钟前 · 变更 14 个文件 (+428 / -112 行)
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 font-mono text-xs text-slate-400">
+            <span>巡检用时: <strong class="text-slate-200">1.82s</strong></span>
+            <span>·</span>
+            <span>Token 开销: <strong class="text-slate-200">12,450</strong></span>
+          </div>
+        </div>
+
+        <!-- 核心统计大盘 (Hairline + Inset Specular 卡片) -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- 卡片 1 -->
+          <div class="relative rounded-xl border border-white/10 bg-slate-900/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-white/20">
+            <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+              <span>安全合规评分</span>
+              <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+              <span class="text-3xl font-bold tracking-tight text-white font-mono">84.5</span>
+              <span class="text-xs text-amber-400 font-mono">-5.2 pt</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-400">存在并发竞态风险</div>
+          </div>
+
+          <!-- 卡片 2 -->
+          <div class="relative rounded-xl border border-white/10 bg-slate-900/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-white/20">
+            <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+              <span>代码坏味道 (Smells)</span>
+              <i data-lucide="flame" class="w-4 h-4 text-slate-400"></i>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+              <span class="text-3xl font-bold tracking-tight text-white font-mono">3</span>
+              <span class="text-xs text-emerald-400 font-mono">-2 vs 历史</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-400">已自动推荐优化 Patch</div>
+          </div>
+
+          <!-- 卡片 3 -->
+          <div class="relative rounded-xl border border-white/10 bg-slate-900/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-white/20">
+            <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+              <span>单测覆盖率预测</span>
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+              <span class="text-3xl font-bold tracking-tight text-emerald-400 font-mono">92.8%</span>
+              <span class="text-xs text-emerald-400 font-mono">+1.4%</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-400">新增 18 个测试用例</div>
+          </div>
+
+          <!-- 卡片 4 -->
+          <div class="relative rounded-xl border border-white/10 bg-slate-900/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] transition-all duration-200 hover:border-white/20">
+            <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+              <span>AI 自动修复准入</span>
+              <i data-lucide="sparkles" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <div class="mt-3 flex items-baseline gap-2">
+              <span class="text-3xl font-bold tracking-tight text-cyan-400 font-mono">Ready</span>
+            </div>
+            <div class="mt-2 text-xs text-slate-400">一键应用变更差异</div>
+          </div>
+        </div>
+
+        <!-- 双栏核心代码诊断与建议审查区 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          <!-- 左侧：漏洞与审查问题列表 (占 2 列) -->
+          <div class="lg:col-span-2 space-y-4">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-semibold tracking-wide text-slate-200 uppercase font-mono">待解决漏洞 (2 Issues)</h3>
+              <div class="flex gap-2">
+                <button class="text-xs bg-slate-900 hover:bg-slate-800 border border-white/10 px-2.5 py-1 rounded text-slate-300 transition-all font-mono">全部折叠</button>
+                <button class="text-xs bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-2.5 py-1 rounded transition-all font-mono font-medium">采纳全部修复</button>
+              </div>
+            </div>
+
+            <!-- 问题卡片 1 (高危) -->
+            <div class="rounded-xl border border-rose-500/30 bg-slate-900/80 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] space-y-3">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase">CRITICAL</span>
+                  <span class="font-mono text-sm font-medium text-white">auth_middleware.go:88</span>
+                </div>
+                <span class="text-xs text-slate-400 font-mono">CWE-362 Race Condition</span>
+              </div>
+              <p class="text-sm text-slate-300 leading-relaxed">
+                在无读写锁保护的情况下直接并发写入共享 Session 缓存，极易在高并发鉴权流量下引发协程 Panic 或内存覆写。
+              </p>
+
+              <!-- 代码 Diff 区块 -->
+              <div class="rounded-lg bg-slate-950 border border-white/10 font-mono text-xs overflow-hidden">
+                <div class="bg-slate-900/90 px-3 py-1.5 border-b border-white/10 flex items-center justify-between text-slate-400 text-[11px]">
+                  <span>pkg/middleware/auth_middleware.go</span>
+                  <span>-3, +6 lines</span>
+                </div>
+                <div class="p-3 space-y-1 text-slate-300">
+                  <div class="text-rose-400/90 bg-rose-950/30 px-2 py-0.5 rounded flex items-center gap-3">
+                    <span class="select-none text-slate-600 w-6 text-right">88</span>
+                    <span>- sessionCache.Store(token, userData)</span>
+                  </div>
+                  <div class="text-emerald-400/90 bg-emerald-950/30 px-2 py-0.5 rounded flex items-center gap-3">
+                    <span class="select-none text-slate-600 w-6 text-right">88</span>
+                    <span>+ m.mutex.Lock()</span>
+                  </div>
+                  <div class="text-emerald-400/90 bg-emerald-950/30 px-2 py-0.5 rounded flex items-center gap-3">
+                    <span class="select-none text-slate-600 w-6 text-right">89</span>
+                    <span>+ defer m.mutex.Unlock()</span>
+                  </div>
+                  <div class="text-emerald-400/90 bg-emerald-950/30 px-2 py-0.5 rounded flex items-center gap-3">
+                    <span class="select-none text-slate-600 w-6 text-right">90</span>
+                    <span>+ sessionCache.Store(token, userData)</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 操作按钮 -->
+              <div class="flex items-center justify-end gap-3 pt-2">
+                <button class="text-xs text-slate-400 hover:text-slate-200 transition-colors">忽略此警告</button>
+                <button class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-mono font-bold transition-all shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+                  应用 AI Patch
+                </button>
+              </div>
+            </div>
+
+            <!-- 问题卡片 2 (中危) -->
+            <div class="rounded-xl border border-white/10 bg-slate-900/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] space-y-3">
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 uppercase">WARNING</span>
+                  <span class="font-mono text-sm font-medium text-white">db_connection.go:42</span>
+                </div>
+                <span class="text-xs text-slate-400 font-mono">Resource Leak</span>
+              </div>
+              <p class="text-sm text-slate-300 leading-relaxed">
+                数据库连接池未显式配置 `SetConnMaxLifetime`，长连接在被服务端静默关闭后可能产生偶发 `broken pipe` 错误。
+              </p>
+              <div class="flex items-center justify-end gap-3 pt-1">
+                <button class="text-xs text-slate-400 hover:text-slate-200 transition-colors">查看上下文</button>
+                <button class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-white/10 text-slate-200 text-xs font-mono transition-all">
+                  生成修复代码
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧：AI 审查 Agent 对话与合规检查清单 (占 1 列) -->
+          <div class="space-y-4">
+            <h3 class="text-sm font-semibold tracking-wide text-slate-200 uppercase font-mono">自动化合规门禁</h3>
+
+            <div class="rounded-xl border border-white/10 bg-slate-900/60 p-5 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] space-y-4">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="flex items-center gap-2 text-slate-300">
+                    <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                    敏感凭据与密钥静态扫描
+                  </span>
+                  <span class="font-mono text-emerald-400 font-bold">PASSED</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="flex items-center gap-2 text-slate-300">
+                    <i data-lucide="check" class="w-4 h-4 text-emerald-400"></i>
+                    开源依赖漏洞 (SCA)
+                  </span>
+                  <span class="font-mono text-emerald-400 font-bold">PASSED</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="flex items-center gap-2 text-slate-300">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+                    并发竞态模型校验
+                  </span>
+                  <span class="font-mono text-amber-400 font-bold">FAILED (1)</span>
+                </div>
+                <div class="flex items-center justify-between text-xs">
+                  <span class="flex items-center gap-2 text-slate-300">
+                    <i data-lucide="clock" class="w-4 h-4 text-slate-500"></i>
+                    基准性能压测回退率 (Benchmark)
+                  </span>
+                  <span class="font-mono text-slate-400">PENDING</span>
+                </div>
+              </div>
+
+              <div class="border-t border-white/10 pt-4">
+                <label for="ai-instruction" class="text-xs font-mono text-slate-400 block mb-2">向审查 Agent 发送纠偏指令：</label>
+                <div class="relative">
+                  <input id="ai-instruction" type="text" placeholder="例如：将 auth 锁改为细粒度读写分段锁..." class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500/60 focus:ring-1 focus:ring-cyan-500/50 font-sans" />
+                  <button aria-label="发送纠偏指令" class="absolute right-1.5 top-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 px-2 py-1 rounded text-[11px] font-mono">发送</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Agent 运行状态卡 -->
+            <div class="rounded-xl border border-white/10 bg-slate-900/40 p-4 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)] flex items-center gap-3">
+              <div class="relative">
+                <div class="w-3 h-3 rounded-full bg-cyan-400"></div>
+                <div class="w-3 h-3 rounded-full bg-cyan-400 animate-ping absolute inset-0 opacity-75"></div>
+              </div>
+              <div class="text-xs">
+                <div class="font-medium text-slate-200 font-mono">实时巡检管道在线</div>
+                <div class="text-slate-400 text-[11px]">监听 main 与 feature 分支 Webhook</div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

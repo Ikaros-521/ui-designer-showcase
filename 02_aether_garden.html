@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aether Garden - 思考花园与灵感知识空间</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            stone: {
+              50: '#fafaf9',
+              100: '#f5f5f4',
+              200: '#e7e5e4',
+              300: '#d6d3d1',
+              400: '#a8a29e',
+              500: '#78716c',
+              600: '#57534e',
+              700: '#44403c',
+              800: '#292524',
+              900: '#1c1917',
+              950: '#0c0a09',
+            }
+          },
+          fontFamily: {
+            sans: ['"Charter"', '"Source Serif Pro"', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
+            display: ['"Newsreader"', '"Playfair Display"', 'Georgia', 'serif'],
+            mono: ['"JetBrains Mono"', '"SF Mono"', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#fcfbf9] text-stone-800 antialiased min-h-screen selection:bg-amber-100 selection:text-amber-900 flex flex-col font-sans">
+
+  <!-- 细节点插拔 Mixin 状态标识条 -->
+  <aside aria-label="细节点插拔插件状态" class="bg-stone-900 text-stone-300 px-4 py-2 flex items-center justify-between text-xs font-mono border-b border-stone-800">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
+      <span class="text-stone-400">[已挂载细节点插件]</span>
+      <span class="bg-stone-800 px-2 py-0.5 rounded text-amber-300">slot_elevation: plugin_soft_diffusion</span>
+      <span class="bg-stone-800 px-2 py-0.5 rounded text-amber-300">slot_layout: plugin_bento_grid</span>
+      <span class="bg-stone-800 px-2 py-0.5 rounded text-amber-300">slot_palette: plugin_warm_stone</span>
+      <span class="bg-stone-800 px-2 py-0.5 rounded text-amber-300">slot_interaction: plugin_tactile_bounce</span>
+    </div>
+    <span class="text-stone-400 hidden md:inline">柔和弥散轻投影 · Bento 错落网格 · 温润暖石系</span>
+  </aside>
+
+  <!-- 顶部沉浸式导航 -->
+  <header class="sticky top-0 z-20 bg-[#fcfbf9]/90 backdrop-blur-md border-b border-stone-200/60">
+    <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-9 w-9 rounded-xl bg-stone-900 flex items-center justify-center text-amber-100 font-serif font-bold text-lg shadow-[0_4px_12px_rgba(28,25,23,0.15)]">
+          Æ
+        </div>
+        <div>
+          <h1 class="text-base font-semibold text-stone-900 tracking-tight font-display">Aether Garden</h1>
+          <p class="text-xs text-stone-500 font-mono">Digital Thought Sanctuary · 思考花园</p>
+        </div>
+      </div>
+
+      <!-- 中间过滤器 -->
+      <div class="hidden sm:flex items-center gap-1 bg-stone-100 p-1 rounded-xl border border-stone-200/60 text-xs font-medium text-stone-600">
+        <button class="px-3 py-1.5 rounded-lg bg-white text-stone-900 shadow-sm transition-all">全景工作台</button>
+        <button class="px-3 py-1.5 rounded-lg hover:text-stone-900 transition-all">双向图谱</button>
+        <button class="px-3 py-1.5 rounded-lg hover:text-stone-900 transition-all">认知复盘</button>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-stone-200/80 bg-white hover:bg-stone-50 text-stone-700 text-xs font-medium transition-all duration-150 active:scale-95 shadow-[0_2px_6px_rgba(0,0,0,0.02)]">
+          <i data-lucide="sparkles" class="w-3.5 h-3.5 text-amber-600"></i>
+          AI 聚类整理
+        </button>
+        <button class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-medium transition-all duration-150 active:scale-95 shadow-[0_4px_12px_rgba(28,25,23,0.12)]">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          记录灵感
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主内容区：Bento Grid 网格布局 -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-6 py-8">
+
+    <!-- 问候与日期导读 -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-baseline justify-between gap-2 border-b border-stone-200/60 pb-6">
+      <div>
+        <span class="text-xs font-mono text-stone-400 uppercase tracking-widest">Friday, October 16</span>
+        <h2 class="text-3xl font-normal text-stone-900 tracking-tight font-display mt-1">今天沉淀了 4 条深度洞见</h2>
+      </div>
+      <div class="flex items-center gap-4 text-xs font-mono text-stone-500">
+        <span>心流时间: <strong class="text-stone-800">2h 45m</strong></span>
+        <span>·</span>
+        <span>碎片连接率: <strong class="text-amber-700 font-bold">88.4%</strong></span>
+      </div>
+    </div>
+
+    <!-- Bento 错落网格 (Bento Grid) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-5 auto-rows-[minmax(180px,auto)]">
+
+      <!-- 核心重点大卡：跨 2 列 2 行 -->
+      <div class="md:col-span-2 lg:col-span-2 md:row-span-2 rounded-2xl border border-stone-200/70 bg-white p-7 shadow-[0_10px_30px_rgba(0,0,0,0.03),0_2px_6px_rgba(0,0,0,0.02)] transition-all duration-200 hover:shadow-[0_20px_45px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between">
+            <span class="px-2.5 py-1 rounded-md bg-stone-100 text-stone-600 text-xs font-mono">深度长文构思</span>
+            <span class="text-xs text-stone-400 font-mono">14 分钟前更新</span>
+          </div>
+          <h3 class="text-xl font-medium text-stone-900 mt-4 leading-snug font-display">
+            论“细节点积木式插拔”在 AI 原型系统中的架构演变与美学约束
+          </h3>
+          <p class="text-stone-600 text-sm mt-3 leading-relaxed">
+            将不易产生分歧的基座审美（如严谨字阶比、网格节律、无障碍对比度）内化，而把色彩、阴影层次与动效等高主观性诉求拆成微插件热插拔，是避免“AI Slop”同质化设计的核心解法。
+          </p>
+
+          <!-- 标签与双向连接引用 -->
+          <div class="flex flex-wrap gap-2 mt-5">
+            <span class="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-800 border border-amber-200/50 flex items-center gap-1 font-mono">
+              <i data-lucide="link" class="w-3 h-3"></i> #系统设计哲学
+            </span>
+            <span class="text-xs px-2.5 py-1 rounded-lg bg-stone-50 text-stone-600 border border-stone-200/50 flex items-center gap-1 font-mono">
+              <i data-lucide="hash" class="w-3 h-3"></i> 交互设计
+            </span>
+            <span class="text-xs px-2.5 py-1 rounded-lg bg-stone-50 text-stone-600 border border-stone-200/50 flex items-center gap-1 font-mono">
+              <i data-lucide="hash" class="w-3 h-3"></i> 渐进增强
+            </span>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+          <div class="flex items-center gap-2">
+            <i data-lucide="file-text" class="w-4 h-4 text-stone-400"></i>
+            <span>已撰写 2,420 字 · 预计阅读 6 分钟</span>
+          </div>
+          <button class="font-medium text-stone-900 hover:text-amber-800 transition-colors flex items-center gap-1">
+            继续书写 <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 快速灵感便签卡：单格 -->
+      <div class="rounded-2xl border border-stone-200/70 bg-[#fffdf8] p-5 shadow-[0_8px_25px_rgba(0,0,0,0.03)] transition-all duration-200 hover:shadow-[0_16px_35px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between text-amber-700">
+            <span class="text-xs font-mono font-medium flex items-center gap-1">
+              <i data-lucide="zap" class="w-3.5 h-3.5"></i> 晨间灵感
+            </span>
+            <span class="text-[11px] text-stone-400 font-mono">08:42</span>
+          </div>
+          <p class="text-stone-800 text-sm mt-3 leading-relaxed italic font-serif">
+            “简洁并不意味着功能的简陋，而是让关键信息在没有噪音的环境下自然流动。”
+          </p>
+        </div>
+        <div class="pt-3 border-t border-amber-100/60 flex items-center justify-between text-xs text-stone-400">
+          <span>摘录自《设计心理学》</span>
+          <i data-lucide="bookmark" class="w-3.5 h-3.5 text-stone-400 hover:text-amber-700 cursor-pointer"></i>
+        </div>
+      </div>
+
+      <!-- 每日待办清单卡：单格 -->
+      <div class="rounded-2xl border border-stone-200/70 bg-white p-5 shadow-[0_8px_25px_rgba(0,0,0,0.03)] transition-all duration-200 hover:shadow-[0_16px_35px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-mono text-stone-500 uppercase tracking-wide">今日心流清单</span>
+            <span class="text-xs font-mono text-emerald-600 font-bold">2/3</span>
+          </div>
+          <ul class="space-y-2.5 text-xs text-stone-700">
+            <li class="flex items-center gap-2.5 line-through text-stone-400">
+              <span class="w-4 h-4 rounded bg-stone-200 flex items-center justify-center text-stone-500 text-[10px]">✓</span>
+              <span>整理本周 Agent 架构笔记</span>
+            </li>
+            <li class="flex items-center gap-2.5 line-through text-stone-400">
+              <span class="w-4 h-4 rounded bg-stone-200 flex items-center justify-center text-stone-500 text-[10px]">✓</span>
+              <span>给开源仓库补充插件示例</span>
+            </li>
+            <li class="flex items-center gap-2.5 text-stone-800 font-medium">
+              <span class="w-4 h-4 rounded border border-stone-300 flex items-center justify-center"></span>
+              <span>撰写第 3 章节核心结论</span>
+            </li>
+          </ul>
+        </div>
+        <button class="w-full mt-3 py-1.5 rounded-lg border border-dashed border-stone-200 text-stone-500 hover:text-stone-800 hover:border-stone-400 text-xs transition-all active:scale-95 flex items-center justify-center gap-1 font-mono">
+          <i data-lucide="plus" class="w-3 h-3"></i> 添加待办
+        </button>
+      </div>
+
+      <!-- 知识双向链接图谱雷达卡：跨 2 列 -->
+      <div class="md:col-span-2 rounded-2xl border border-stone-200/70 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.03)] transition-all duration-200 hover:shadow-[0_16px_35px_rgba(0,0,0,0.05)] hover:-translate-y-0.5 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <div>
+            <h4 class="text-sm font-semibold text-stone-900 font-display">图谱密度与共现关系 (Bi-directional Graph)</h4>
+            <p class="text-xs text-stone-500 mt-0.5">自动识别出 3 个高频交汇枢纽节点</p>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[11px] font-mono bg-stone-100 text-stone-600">全库 128 节点</span>
+        </div>
+
+        <!-- 模拟微图谱网络 -->
+        <div class="my-4 py-4 flex items-center justify-around bg-stone-50/70 rounded-xl border border-stone-100">
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full bg-stone-900 text-amber-200 flex items-center justify-center text-xs font-mono shadow-sm">
+              UI
+            </div>
+            <span class="text-[11px] text-stone-600 mt-1 font-mono">界面架构 (42)</span>
+          </div>
+          <div class="h-0.5 w-12 bg-stone-200"></div>
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full bg-amber-700 text-white flex items-center justify-center text-xs font-mono shadow-sm">
+              LLM
+            </div>
+            <span class="text-[11px] text-stone-600 mt-1 font-mono">大模型基座 (68)</span>
+          </div>
+          <div class="h-0.5 w-12 bg-stone-200"></div>
+          <div class="flex flex-col items-center">
+            <div class="w-10 h-10 rounded-full bg-stone-700 text-white flex items-center justify-center text-xs font-mono shadow-sm">
+              Ops
+            </div>
+            <span class="text-[11px] text-stone-600 mt-1 font-mono">工作流 (31)</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-stone-400">
+          <span>最近一次拓扑重构: 今日 14:00</span>
+          <a href="#" class="text-stone-700 hover:text-stone-900 font-medium font-mono flex items-center gap-1">
+            进入三维图谱视图 <i data-lucide="external-link" class="w-3 h-3"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- 快速捕捉输入框：跨 2 列 -->
+      <div class="md:col-span-2 rounded-2xl border border-dashed border-stone-300 bg-stone-50/50 p-6 flex items-center justify-between gap-4">
+        <div class="flex-1">
+          <label for="thought-input" class="text-xs font-mono text-stone-400 block mb-1">闪念随手记 (Press Cmd+K anytime)</label>
+          <input id="thought-input" type="text" placeholder="输入灵感、观点、或要摘抄的段落..." class="w-full bg-transparent border-0 text-sm text-stone-800 placeholder-stone-400 focus:outline-none font-serif text-base" />
+        </div>
+        <button aria-label="保存灵感" class="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white text-xs font-mono transition-all duration-150 active:scale-95 shadow-sm">
+          保存
+        </button>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- 底部简洁版权 -->
+  <footer class="mt-auto border-t border-stone-200/60 py-6 text-center text-xs text-stone-400 font-mono">
+    Aether Garden · Powered by Pluggable UI Designer & Slot Mixins
+  </footer>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

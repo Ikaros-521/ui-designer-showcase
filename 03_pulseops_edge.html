@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PulseOps Edge - 边缘云节点实时监控大盘</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            neutral: {
+              850: '#1f1f1f',
+              900: '#171717',
+              950: '#0a0a0a',
+            }
+          },
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"SF Mono"', 'Consolas', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-neutral-950 text-neutral-100 antialiased min-h-screen flex flex-col font-sans selection:bg-neutral-800 selection:text-white">
+
+  <!-- 细节点插拔 Mixin 状态标识条 -->
+  <aside aria-label="细节点插拔插件状态" class="bg-neutral-900 border-b border-neutral-800 px-4 py-2 flex items-center justify-between text-xs font-mono text-neutral-400">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+      <span class="text-neutral-500">[已挂载细节点插件]</span>
+      <span class="bg-neutral-800 border border-neutral-700 px-2 py-0.5 rounded text-neutral-200">slot_elevation: plugin_flat_zen</span>
+      <span class="bg-neutral-800 border border-neutral-700 px-2 py-0.5 rounded text-neutral-200">slot_layout: 高密自适应网格</span>
+      <span class="bg-neutral-800 border border-neutral-700 px-2 py-0.5 rounded text-neutral-200">slot_palette: 极简黑白灰 + 翡翠绿</span>
+      <span class="bg-neutral-800 border border-neutral-700 px-2 py-0.5 rounded text-neutral-200">slot_interaction: plugin_tactile_bounce</span>
+    </div>
+    <span class="text-neutral-500 hidden md:inline">纯扁平素雅 · 零阴影 · 纯微差色阶区分层次</span>
+  </aside>
+
+  <!-- 顶部主导航栏 -->
+  <header class="border-b border-neutral-800 bg-neutral-950 sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="h-7 w-7 bg-white text-neutral-950 font-mono font-black text-sm flex items-center justify-center rounded">
+          P
+        </div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-sm font-bold text-white tracking-tight uppercase font-mono">PulseOps // Edge</h1>
+          <span class="text-[11px] font-mono text-neutral-500">v4.1.0-prod</span>
+        </div>
+      </div>
+
+      <!-- 快捷状态标签 -->
+      <div class="flex items-center gap-4 text-xs font-mono">
+        <div class="flex items-center gap-1.5 text-neutral-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>48/48 节点正常</span>
+        </div>
+        <div class="h-3 w-px bg-neutral-800"></div>
+        <div class="text-neutral-400">
+          集群吞吐: <span class="text-white font-bold">142.8 Gbps</span>
+        </div>
+        <button class="px-2.5 py-1 bg-white hover:bg-neutral-200 text-neutral-950 font-bold rounded text-xs transition-all active:scale-95 font-mono">
+          导出遥测日志
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体工作区 -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- 顶部概览指标栏 (Flat 零阴影，纯背景色阶差异) -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+
+      <div class="border border-neutral-800 bg-neutral-900 p-4 rounded-none">
+        <div class="text-[11px] font-mono uppercase tracking-wider text-neutral-400 flex items-center justify-between">
+          <span>总请求负载 (QPS)</span>
+          <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-neutral-500"></i>
+        </div>
+        <div class="mt-2 text-2xl font-bold font-mono tracking-tight text-white">
+          1,489,204
+        </div>
+        <div class="mt-1 text-[11px] font-mono text-emerald-400">
+          ↑ 12.4% 比昨日均值
+        </div>
+      </div>
+
+      <div class="border border-neutral-800 bg-neutral-900 p-4 rounded-none">
+        <div class="text-[11px] font-mono uppercase tracking-wider text-neutral-400 flex items-center justify-between">
+          <span>全局平均延迟 (P99)</span>
+          <i data-lucide="zap" class="w-3.5 h-3.5 text-neutral-500"></i>
+        </div>
+        <div class="mt-2 text-2xl font-bold font-mono tracking-tight text-emerald-400">
+          14.2 ms
+        </div>
+        <div class="mt-1 text-[11px] font-mono text-neutral-400">
+          符合 SLA 承诺 (&lt; 25ms)
+        </div>
+      </div>
+
+      <div class="border border-neutral-800 bg-neutral-900 p-4 rounded-none">
+        <div class="text-[11px] font-mono uppercase tracking-wider text-neutral-400 flex items-center justify-between">
+          <span>边缘缓存命中率</span>
+          <i data-lucide="database" class="w-3.5 h-3.5 text-neutral-500"></i>
+        </div>
+        <div class="mt-2 text-2xl font-bold font-mono tracking-tight text-white">
+          98.6%
+        </div>
+        <div class="mt-1 text-[11px] font-mono text-neutral-400">
+          源站回源节省 94.2%
+        </div>
+      </div>
+
+      <div class="border border-neutral-800 bg-neutral-900 p-4 rounded-none">
+        <div class="text-[11px] font-mono uppercase tracking-wider text-neutral-400 flex items-center justify-between">
+          <span>异常错误率 (5xx)</span>
+          <i data-lucide="alert-circle" class="w-3.5 h-3.5 text-neutral-500"></i>
+        </div>
+        <div class="mt-2 text-2xl font-bold font-mono tracking-tight text-white">
+          0.0018%
+        </div>
+        <div class="mt-1 text-[11px] font-mono text-emerald-400">
+          健康水平极佳
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 节点状态网格与拓扑排布 -->
+    <div class="border border-neutral-800 bg-neutral-900 p-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 pb-3 border-b border-neutral-800">
+        <div>
+          <h2 class="text-sm font-bold text-white font-mono uppercase tracking-wide">全球主要区域接入点 (Edge PoPs)</h2>
+          <p class="text-xs text-neutral-400 mt-0.5">分布在 18 个地理大区的 Anycast BGP 路由节点</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-2.5 py-1 text-xs font-mono bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 transition-all">全量区域</button>
+          <button class="px-2.5 py-1 text-xs font-mono bg-neutral-950 text-neutral-400 hover:text-white transition-all">亚太 (APAC)</button>
+          <button class="px-2.5 py-1 text-xs font-mono bg-neutral-950 text-neutral-400 hover:text-white transition-all">欧洲 (EMEA)</button>
+          <button class="px-2.5 py-1 text-xs font-mono bg-neutral-950 text-neutral-400 hover:text-white transition-all">北美 (NA)</button>
+        </div>
+      </div>
+
+      <!-- 表格数据形式 (清晰、高密度、零冗余) -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left font-mono text-xs">
+          <thead>
+            <tr class="border-b border-neutral-800 text-neutral-400">
+              <th class="py-2.5 px-3">状态</th>
+              <th class="py-2.5 px-3">节点代号 (IATA)</th>
+              <th class="py-2.5 px-3">部署地域</th>
+              <th class="py-2.5 px-3 text-right">当前流量</th>
+              <th class="py-2.5 px-3 text-right">延迟 (RTT)</th>
+              <th class="py-2.5 px-3 text-right">CPU 负载</th>
+              <th class="py-2.5 px-3 text-right">动作</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-neutral-850">
+            <!-- 节点 1 -->
+            <tr class="hover:bg-neutral-850/60 transition-colors">
+              <td class="py-3 px-3">
+                <span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  OPERATIONAL
+                </span>
+              </td>
+              <td class="py-3 px-3 font-bold text-white">NRT-01 (Tokyo)</td>
+              <td class="py-3 px-3 text-neutral-400">日本·东京核心机房</td>
+              <td class="py-3 px-3 text-right text-white">38.4 Gbps</td>
+              <td class="py-3 px-3 text-right text-emerald-400">8.2 ms</td>
+              <td class="py-3 px-3 text-right">
+                <span class="text-neutral-300">42%</span>
+                <span class="inline-block w-12 bg-neutral-800 h-1 ml-2 rounded-full overflow-hidden align-middle">
+                  <span class="block bg-neutral-400 h-full w-[42%]"></span>
+                </span>
+              </td>
+              <td class="py-3 px-3 text-right">
+                <button class="text-neutral-400 hover:text-white underline">巡检</button>
+              </td>
+            </tr>
+
+            <!-- 节点 2 -->
+            <tr class="hover:bg-neutral-850/60 transition-colors">
+              <td class="py-3 px-3">
+                <span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  OPERATIONAL
+                </span>
+              </td>
+              <td class="py-3 px-3 font-bold text-white">SIN-02 (Singapore)</td>
+              <td class="py-3 px-3 text-neutral-400">新加坡·裕廊</td>
+              <td class="py-3 px-3 text-right text-white">29.1 Gbps</td>
+              <td class="py-3 px-3 text-right text-emerald-400">12.5 ms</td>
+              <td class="py-3 px-3 text-right">
+                <span class="text-neutral-300">58%</span>
+                <span class="inline-block w-12 bg-neutral-800 h-1 ml-2 rounded-full overflow-hidden align-middle">
+                  <span class="block bg-neutral-400 h-full w-[58%]"></span>
+                </span>
+              </td>
+              <td class="py-3 px-3 text-right">
+                <button class="text-neutral-400 hover:text-white underline">巡检</button>
+              </td>
+            </tr>
+
+            <!-- 节点 3 -->
+            <tr class="hover:bg-neutral-850/60 transition-colors">
+              <td class="py-3 px-3">
+                <span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  OPERATIONAL
+                </span>
+              </td>
+              <td class="py-3 px-3 font-bold text-white">FRA-01 (Frankfurt)</td>
+              <td class="py-3 px-3 text-neutral-400">德国·法兰克福主干</td>
+              <td class="py-3 px-3 text-right text-white">44.6 Gbps</td>
+              <td class="py-3 px-3 text-right text-emerald-400">18.9 ms</td>
+              <td class="py-3 px-3 text-right">
+                <span class="text-neutral-300">65%</span>
+                <span class="inline-block w-12 bg-neutral-800 h-1 ml-2 rounded-full overflow-hidden align-middle">
+                  <span class="block bg-neutral-400 h-full w-[65%]"></span>
+                </span>
+              </td>
+              <td class="py-3 px-3 text-right">
+                <button class="text-neutral-400 hover:text-white underline">巡检</button>
+              </td>
+            </tr>
+
+            <!-- 节点 4 -->
+            <tr class="hover:bg-neutral-850/60 transition-colors">
+              <td class="py-3 px-3">
+                <span class="inline-flex items-center gap-1.5 text-amber-400 font-bold">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                  TRAFFIC SPIKE
+                </span>
+              </td>
+              <td class="py-3 px-3 font-bold text-white">SFO-03 (San Jose)</td>
+              <td class="py-3 px-3 text-neutral-400">美国·加州硅谷</td>
+              <td class="py-3 px-3 text-right text-amber-300">62.8 Gbps</td>
+              <td class="py-3 px-3 text-right text-amber-300">22.4 ms</td>
+              <td class="py-3 px-3 text-right">
+                <span class="text-amber-400">88%</span>
+                <span class="inline-block w-12 bg-neutral-800 h-1 ml-2 rounded-full overflow-hidden align-middle">
+                  <span class="block bg-amber-400 h-full w-[88%]"></span>
+                </span>
+              </td>
+              <td class="py-3 px-3 text-right">
+                <button class="text-amber-300 hover:text-white underline">限流分流</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- 底部控制台输出窗口 -->
+    <div class="border border-neutral-800 bg-neutral-900 p-4">
+      <div class="flex items-center justify-between text-xs font-mono text-neutral-400 pb-2 border-b border-neutral-800">
+        <span class="flex items-center gap-2">
+          <i data-lucide="terminal" class="w-3.5 h-3.5 text-neutral-500"></i>
+          实时 Anycast 调度路由流
+        </span>
+        <span>Filter: --all --log-level=info</span>
+      </div>
+      <div class="mt-3 font-mono text-[11px] text-neutral-400 space-y-1">
+        <div>[19:35:12] <span class="text-emerald-400">BGP_UPDATE</span>: Prefixes 203.0.113.0/24 re-routed via AS13335 (Latency -4ms)</div>
+        <div>[19:35:18] <span class="text-neutral-300">CERT_RENEW</span>: Let's Encrypt Wildcard Auto-renewed for *.edge.pulseops.io</div>
+        <div>[19:35:24] <span class="text-amber-400">THROTTLE</span>: Rate limit applied to subnet 198.51.100.0/24 (exceeded 10k req/min threshold)</div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
